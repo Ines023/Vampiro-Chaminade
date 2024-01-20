@@ -1,0 +1,149 @@
+{% extends "/profile/layout_profile.html" %}
+
+{% block title %}Mis stats{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block navbar %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="bg black-overlay">
+    <div class="container.fluid my-5 py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+
+            <div class="col-11 col-md-8 col-lg-6 col-xl-5 m-2">
+                <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-2">
+
+                            <h1 class="fw-bold mb-2 text-uppercase">MIS STATS</h1>
+                            <p class="text-white-50 mb-5">Aquí puedes ver la información más relevante sobre tu partida.
+                            </p>
+
+                            <div>
+                                <h3 class="my-3">Tu presa actual</h3>
+                                <p>Nombre: {{ prey.name }}</p>
+                                <p>Habitación: {{ prey.room }}</p>
+                                {% if disputes.duel_where_hunter is not none %}
+                                <div class="alert alert-danger pixel-text h5" role="alert">Ya se ha iniciado una disputa.</div>
+                                {% else %}
+                                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 16px)" href="{{ url_for('profile.death_accusation')}}">La he matado</a>
+                                {% endif %}
+                            </div>
+                            <hr>
+                            <div>
+                                <h3 class="my-3">Asesinatos</h3>
+                                <p>Durante esta ronda: {{ kills.round }}</p>
+                                <p>Totales: {{ kills.total }}</p>
+                                {% if kills.round == 0 %}
+                                    <div class="alert alert-warning pixel-text h5" role="alert">¡Mata a alguien antes de que termine la ronda o morirás de inanición!</div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-11 col-md-8 col-lg-6 col-xl-5 m-2">
+                <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-2">
+
+                            <h1 class="fw-bold mb-2 text-uppercase">DISPUTAS</h1>
+                            <p class="text-white-50 mb-5">¿Tienes alguna disputa activa?<br>¡Estate atento para que no
+                                se te pase el tiempo!</p>
+
+                            {% if disputes.death_accusation is not none %}
+                                <div>
+                                    <h3 class="my-3">¿Has muerto?</h3>
+                                    <p>Tu cazador dice que has muerto, ¿estás de acuerdo?</p>
+                                    <form method="POST" action="{{ url_for('profile.death_accusation') }}">
+                                        {{ death_accusation_form.csrf_token }}
+                                        <button type="submit" name="response" value="True" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">SÍ</button>
+                                        <button type="submit" name="response" value="False" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">NO</button>
+                                    </form>
+                                </div>
+                                <hr>
+                            {% endif %}
+
+                            {% if disputes.duel_where_hunter is not none or disputes.duel_where_prey is not none %}
+                            <div>
+                                <h1 class="my-3">DUELOS DE MEDIANOCHE</h1>
+
+                                {% if disputes.duel_where_hunter is not none %}
+                                <div>
+                                    <h2 class="my-3 text-danger pixel-text">{{ player.name }} ({{player.room}}) y {{prey.name}} ({{prey.room}})</h2>
+                                    <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta ___ para hablarlo.</p>
+                                    <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas? Contacta a uno de los organizadores.</div>
+                                    <p>Esta es vuestra última oportunidad.<br>Si no respondéis lo mismo, el azar decidirá quién gana este duelo.</p>
+                                    
+                                    {% if disputes.duel_where_hunter.hunter_duel_response is none %}
+                                        <h4>¿Has matado?</h4>
+                                        <form method="POST" action="{{ url_for('profile.duel_response') }}">
+                                            {{ duel_response_form_hunter.csrf_token }}
+                                            <input type="hidden" name="type" value="hunter">
+                                            <button type="submit" name="response" value="True" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">SÍ</button>
+                                            <button type="submit" name="response" value="False" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">NO</button>
+                                        </form>
+                                    {% else %}
+                                        <p> Hemos guardado tu respuesta:
+                                        {% if disputes.duel_where_hunter.hunter_duel_response %}
+                                            Sí he matado. <br>
+                                        {% else %}
+                                            No he matado. <br>
+                                        {% endif %}
+                                        Estamos esperando la respuesta de {{ prey.name }}.</p>
+                                    {% endif %}
+
+                                </div>
+                                {% endif %}
+
+                                {% if disputes.duel_where_hunter is not none and disputes.duel_where_prey is not none %}
+                                <hr>
+                                {% endif %}
+
+                                {% if disputes.duel_where_prey is not none %}
+                                <div>
+                                    <h2 class="my-3 text-danger pixel-text">{{hunter.name}} ({{hunter.room}}) y {{ player.name }} ({{ player.room }})</h2>
+                                    <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta ___ para hablarlo.</p>
+                                    <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas? Contacta a uno de los organizadores.</div>
+                                    <p>Esta es vuestra última oportunidad.<br>Si no respondéis lo mismo, el azar decidirá quién gana este duelo.</p>
+                                    {% if disputes.duel_where_hunter.hunter_duel_response is none %}
+                                        <h4>¿Te han matado?</h4>
+                                        <form method="POST" action="{{ url_for('profile.duel_response') }}">
+                                            {{ duel_response_form_prey.csrf_token }}
+                                            <input type="hidden" name="type" value="prey">
+                                            <button type="submit" name="response" value="True" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">SÍ</button>
+                                            <button type="submit" name="response" value="False" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">NO</button>
+                                        </form>
+                                    {% else %}
+                                        <p> Hemos guardado tu respuesta:
+                                        {% if disputes.duel_where_hunter.hunter_duel_response %}
+                                            Sí, me han matado. <br>
+                                        {% else %}
+                                            No me han matado. <br>
+                                        {% endif %}
+                                        Estamos esperando la respuesta de {{ prey.name }}.</p>
+                                    {% endif %}
+
+                                </div>
+                                {% endif %}
+
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}

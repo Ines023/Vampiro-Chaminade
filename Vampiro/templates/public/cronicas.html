@@ -1,0 +1,59 @@
+{% extends "/public/layout_public.html" %}
+
+{% block title %}Crónicas{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block navbar %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="bg black-overlay">
+    <div class="container.fluid m-5 py-5">
+      <div class="row d-flex justify-content-center align-items-center">
+        
+        <!-- APUNTE DEL LATERAL -->
+        <div class="col-lg-4 m-2 vh-lg-100">
+
+          <div class="card bg-dark text-white" style="border-radius: 1rem;">
+            <div class="card-body p-5">
+
+              <div class="mb-md-5 mt-md-2 pb-5">
+
+                <h1 class="pixel-text">LAS CRÓNICAS</h1>
+
+                <p>Escritos centenarios que recogen leyendas de Vampiros Chaminaders.<br><br>Cada semana aparecerá una nueva, ¡resumiendo cómo avanza el juego!</p>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+        
+        <!-- CRÓNICAS DE VERDAD -->
+        <div class="col-lg-7 m-2 vh-lg-100 overflow-auto">
+
+          <article class="card bg-dark text-white my-4" style="border-radius: 1rem;">
+            <div class="card-body p-4">
+
+              <div class="mb-md-5 mt-md-4 px-5 pb-4">
+                {% for cronica in cronicas %}
+                <h1 class="pixel-text text-center" style="font-size: 50px;">{{ cronica.title }}</h1>
+                {{ cronica.content|safe }}  
+                {% endfor %}
+              </div>
+
+            </div>
+          </article>
+
+        </div>
+
+        
+      </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "/public/layout_public.html" %}
+
+{% block title %}Restaurar contraseña{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block navbar %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="bg black-overlay">
+    <div class="container my-5 py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+          <div class="card bg-dark text-white" style="border-radius: 1rem;">
+            <div class="card-body p-5 text-center">
+
+              <div class="mb-md-3 mt-md-3 pb-4">
+
+                <h2 class="fw-bold mb-2 text-uppercase">CAMBIO DE CONTRASEÑA</h2>
+                <p class="text-white-50 mb-5">Escoje tu nueva contraseña.<br> Aunque no recomendamos que tus contraseñas sean "1234" intenta coger algo de lo que no te vayas a olvidar esta vez.<br><br><span class="small">"Contraseña" tampoco es buena opción</span></p>
+
+                <form action="{{ url_for('public.reset_with_token', token=token) }}" method="post">
+
+                <!-- Password input -->
+                <div class="form-outline form-white mb-4">
+                    {{ form.password.label }}: {{ form.password (class="form-control form-control-lg")}}
+                  </div>
+
+                <!-- Confirm Password input -->
+                <div class="form-outline form-white mb-1">
+                {{ form.confirm_password.label }}: {{ form.confirm_password (class="form-control form-control-lg")}}
+                </div>
+
+                  <!-- Security token -->
+                  {{ form.csrf_token }}
+                </div>
+
+                <!-- Submit button -->
+                {{ form.submit(class_="btn btn-danger btn-block mb-4") }}
+
+                </form>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}

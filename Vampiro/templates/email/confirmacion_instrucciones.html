@@ -1,0 +1,53 @@
+{% extends "/security/email/layout_email.html" %}
+
+{% block title %}{% endblock %}
+
+{% block header %}
+{{super()}}
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<section style="background-color: #130b15;">
+    <div class="container pb-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-m-8">
+            
+            <div style="position: relative;">
+                <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}" style="max-width: 40%; position: absolute; bottom: 0; right: 2%;" alt="Retrato de vampiro">
+            </div>
+
+
+            <div id="dialogo">
+                <div id="nombre">
+                    <p style="margin: 0;">Conde drácula</p>
+                </div>
+
+
+                <p>Hola {{ user.name }}<br>Ya casi has terminado de registrarte, solo necesitas confirmar tu cuenta.</p>
+
+
+            </div>
+
+
+            <div class="text-center">
+                <a class="btn btn-warning pixel-text m-4 px-5" style="font-size: max(2.5vw, 20px); max-width: 80%;" href="{{ url_for_security('confirm_email', token=token, _external=True) }}">ACTIVA TU CUENTA</a>
+                
+                <div class="pixel-text" style="color: #a7a7a7; font-size: 2vw;">
+                    <p>Te avisaremos cuando empiece el juego</p>
+                </div>
+            
+            </div>
+
+
+
+        </div>
+      </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+{{super()}}
+{% endblock %}

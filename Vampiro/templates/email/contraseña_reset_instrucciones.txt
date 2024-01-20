@@ -1,0 +1,9 @@
+Hola {{ user.name }}
+
+Debería beber hasta la última gota de tu sangre por liarla así...
+En el siguiente link puedes enmendar tu error con una contraseña nueva, ¡pero que no vuelva a ocurrir!
+
+{{ url_for_security('reset_password', token=token, _external=True) }}
+
+No tardes,
+Conde Drácula.

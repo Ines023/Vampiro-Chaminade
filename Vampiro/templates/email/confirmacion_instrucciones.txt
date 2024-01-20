@@ -1,0 +1,12 @@
+Hola {{ user.name }},
+
+Ya casi has terminado de registrarte, solo necesitas confirmar tu cuenta.
+
+Por favor, haz clic en el siguiente enlace para confirmar tu cuenta:
+
+{{ url_for_security('confirm_email', token=token, _external=True) }}
+
+Si no has solicitado este correo, puedes ignorarlo.
+
+Gracias,
+Conde Drácula.

@@ -1,0 +1,161 @@
+/* GENERAL */
+
+.pixel-text {
+  font-family: 'VT323';
+}
+
+
+/* HOME PAGE */
+
+body, html {
+    height: 100%;
+  }
+
+.bg {
+  background-image: url( "../img/vampire_dungeon.jpg" );
+  height: 100%;
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+.black-overlay {
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.5);
+  }
+
+/* CRONICAS */
+@media (min-width: 992px) {
+  .vh-lg-100 {
+    height: 100vh;
+  }
+}
+
+
+
+/* FORMULARIOS */
+
+/* Customize the label (the container) */
+.custom-checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Hide the browser's default checkbox */
+  .custom-checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  /* Create a custom checkbox */
+  .custom-checkmark {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    height: 17px;
+    width: 17px;
+    background-color: #eee;
+  }
+  
+  /* On mouse-over, add a grey background color */
+  .custom-checkbox-container:hover input ~ .custom-checkmark {
+    background-color: #ccc;
+  }
+  
+  /* When the checkbox is checked, add a red background */
+  .custom-checkbox-container input:checked ~ .custom-checkmark {
+    background-color: #f32121;
+  }
+  
+  /* Create the checkmark/indicator (hidden when not checked) */
+  .custom-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  /* Show the checkmark when checked */
+  .custom-checkbox-container input:checked ~ .custom-checkmark:after {
+    display: block;
+  }
+  
+  /* Style the checkmark/indicator */
+  .custom-checkbox-container .custom-checkmark:after {
+    left: 6px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+  }
+
+  #organizerButton:checked ~ #organizerForm {
+    display: block;
+  }
+  
+  #organizerForm {
+      display: none;
+  }
+
+
+
+  /* EMAILS */
+
+  #nombre {
+    position: absolute;
+    top: -20px;
+    left: 40px;
+
+    width: 30%;
+    height: 20%;
+    padding: 5px;
+    background: rgb(145,29,56);
+
+    font-family: 'VT323';
+    font-weight: regular;
+    color: white;
+    text-transform: uppercase;
+  
+    font-family: 'VT323';
+    font-size: max(2.6vw, 18px);
+
+    /* Center text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+  }
+
+  #dialogo {
+    width: 100%;
+    height: 100%;
+    background: rgba(145,29,56,.5);
+
+    font-family: 'VT323';
+    font-size: max(2vw, 16px);
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+
+    padding: 60px 20px 20px 40px;
+
+
+  }
+

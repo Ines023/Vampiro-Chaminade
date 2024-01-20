@@ -1,0 +1,39 @@
+{% extends "/public/layout_public.html" %}
+
+{% block title %}Normas{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block navbar %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="bg black-overlay">
+    <div class="container my-5 py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+          <div class="card bg-dark text-white" style="border-radius: 1rem;">
+            <div class="card-body p-5 text-center">
+
+              <div class="mb-md-5 mt-md-4 pb-5">
+
+                <h1 class="m-2 p-3 pixel-text">¡Esta página es un work in progress!</h1>
+
+                <p class="m-2 p-3 h4 pixel-text"> Estamos en ello, pronto meteremos instrucciones más específicas a esta web y donde encontrar cada cosa, pero aquí tienes un botón para ir al PDF que pasamos por el grupo </p>
+                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="https://drive.google.com/file/d/1IL6MWzzboZemBqZ8jexGl2Hw9Wnl5e1L/view?usp=drive_link
+                " target="_blank">PDF de normas</a>
+                
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}

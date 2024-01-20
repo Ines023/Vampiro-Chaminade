@@ -1,0 +1,18 @@
+{# Vampiro/templates/macros.html #}
+
+{% macro nav_link(endpoint, text) -%}
+    {% if endpoint == request.endpoint %}
+        <a class="nav-link active" href="{{ url_for(endpoint) }}">{{ text }}<span class="sr-only">(current)</span></a>
+    {% else %}
+        <a class="nav-link" href="{{ url_for(endpoint) }}">{{ text }}</a>
+    {% endif %}
+{%- endmacro %}
+
+{% macro login_logout_link(current_user) -%}
+    {% if current_user.is_authenticated %}
+        <a class="btn btn-outline-light px-5" href="{{ url_for('public.logout')}}">Cerrar Sesión</a>
+    {% else %}
+        <a class="btn btn-outline-light px-5" href="{{ url_for('public.login')}}">Inicia Sesión</a>
+    {% endif %}
+{%- endmacro %}
+
