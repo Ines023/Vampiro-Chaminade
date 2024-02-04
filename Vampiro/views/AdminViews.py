@@ -1,9 +1,12 @@
+# /Vampiro/views/AdminViews.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from Vampiro.models import Cronicas
 from Vampiro.utils.forms import NewCronicaForm
 from Vampiro.services.admin_actions import add_cronica
+from Vampiro.utils.security import handle_exceptions
 
 admin = Blueprint('admin', __name__)
 
@@ -15,7 +18,11 @@ def check_role():
     if current_user.role.name != 'admin':
         return redirect(url_for('profile.my_stats'))
 
+
+# ADMIN ______________________________________________________________________________________
+    
 @admin.route('/cronicas')
+@handle_exceptions
 def admin_cronicas():   
 
     form = NewCronicaForm(request.form)

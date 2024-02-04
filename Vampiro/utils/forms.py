@@ -1,3 +1,5 @@
+# /Vampiro/utils/forms.py
+
 from flask import flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField
@@ -9,6 +11,10 @@ from Vampiro.models import User
 # ___ VALIDATORS _________________________________________________________________
 
 class Unique(object):
+    """
+    Validates that a field is unique in the database
+    """
+
     def __init__(self, model, field, message="Este elemento ya existe."):
         self.model = model
         self.field = field
@@ -20,6 +26,10 @@ class Unique(object):
             raise ValidationError(self.message)
         
 class Registered(object):
+    """
+    Validates that a field is registered in the database
+    """
+
     def __init__(self, model, field, message=u'Este elemento no existe.'):
         self.model = model
         self.field = field
@@ -31,6 +41,9 @@ class Registered(object):
             raise ValidationError(self.message)
         
 def handle_form_errors(form):
+    """
+    Flashes the errors of a form
+    """
     for field, errors in form.errors.items():
         for error in errors:
             flash(f"{error}", 'danger')
@@ -83,7 +96,10 @@ class OrganizerForm(FlaskForm):
     
 class DeathAccusationForm(FlaskForm):
     response = SubmitField()
-    
+
+class DeathConfirmationForm(FlaskForm):
+    response = SubmitField()
+
 class DuelResponseForm(FlaskForm):
     type = HiddenField()
 

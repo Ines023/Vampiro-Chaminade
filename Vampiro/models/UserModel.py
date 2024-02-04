@@ -1,3 +1,4 @@
+# Vampiro/models/UserModel.py
 from Vampiro.database.mysql import db
 from flask import current_app
 from flask_login import UserMixin
@@ -50,6 +51,9 @@ class User(db.Model, UserMixin):
     
     @staticmethod
     def verify_confirmation_token(token):
+        """
+        Returns the user if the token is valid, None otherwise
+        """
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token)['confirm_email']
@@ -59,6 +63,9 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def verify_reset_token(token):
+        """
+        Returns the user if the token is valid, None otherwise
+        """
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             user_id = s.loads(token)['reset_password']
@@ -112,4 +119,40 @@ class Dispute(db.Model):
     hunter_duel_response = db.Column(db.Boolean)
     prey_duel_response = db.Column(db.Boolean)
     active = db.Column(db.Boolean, nullable=False)
+
+    @property
+    def death_accusation(self):
+        """
+        Returns True if the dispute is an unresolved death accusation, False otherwise
+        """
+        if self.prey_response == None:
+            duel = True
+        else:
+            duel = False
+        return duel
+
+    @property
+    def duel(self):
+        """
+        Returns True if the dispute has become a duel, False otherwise
+        """
+        if self.prey_response == None or self.prey_response == True:
+            duel = False
+        else:
+            duel = True
+        return duel
+
+    @property
+    def agreed_response(self):
+        """
+        Returns the agreed response if both players have agreed on it, None otherwise
+        """
+        if self.prey_response == True:
+            response = True
+        elif self.prey_duel_response == self.hunter_duel_response and self.prey_duel_response != None:
+            response = self.prey_duel_response
+        else:
+            response = None
+        return response
+
 

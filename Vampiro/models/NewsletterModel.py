@@ -1,3 +1,5 @@
+# Vampiro/models/NewsletterModel.py
+
 class Cronicas(db.Model):
 
     date = db.Column(db.Date, nullable=False, primary_key=True)

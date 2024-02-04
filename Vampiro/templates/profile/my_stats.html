@@ -26,10 +26,13 @@
                                 <h3 class="my-3">Tu presa actual</h3>
                                 <p>Nombre: {{ prey.name }}</p>
                                 <p>Habitación: {{ prey.room }}</p>
-                                {% if disputes.duel_where_hunter is not none %}
-                                <div class="alert alert-danger pixel-text h5" role="alert">Ya se ha iniciado una disputa.</div>
+                                {% if disputes.duel_where_hunter is not none or disputes.death_accusation_where_hunter is not none %}
+                                <div class="alert alert-danger pixel-text h5" role="alert">Ya se ha iniciado una disputa.</div>                               
                                 {% else %}
-                                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 16px)" href="{{ url_for('profile.death_accusation')}}">La he matado</a>
+                                <form method="POST" action="{{ url_for('profile.death_accusation')}}">
+                                    {{ death_accusation_form.csrf_token }}
+                                    <button type="submit" name="response" value="True" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">La he matado</button>
+                                </form>
                                 {% endif %}
                             </div>
                             <hr>
@@ -57,11 +60,11 @@
                             <p class="text-white-50 mb-5">¿Tienes alguna disputa activa?<br>¡Estate atento para que no
                                 se te pase el tiempo!</p>
 
-                            {% if disputes.death_accusation is not none %}
+                            {% if disputes.death_accusation_where_prey is not none %}
                                 <div>
                                     <h3 class="my-3">¿Has muerto?</h3>
                                     <p>Tu cazador dice que has muerto, ¿estás de acuerdo?</p>
-                                    <form method="POST" action="{{ url_for('profile.death_accusation') }}">
+                                    <form method="POST" action="{{ url_for('profile.death_confirmation') }}">
                                         {{ death_accusation_form.csrf_token }}
                                         <button type="submit" name="response" value="True" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">SÍ</button>
                                         <button type="submit" name="response" value="False" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">NO</button>

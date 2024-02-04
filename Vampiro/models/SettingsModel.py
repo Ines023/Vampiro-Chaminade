@@ -1,3 +1,4 @@
+# Vampiro/models/SettingsModel.py
 from sqlalchemy import Enum
 from Vampiro.database.mysql import db
 

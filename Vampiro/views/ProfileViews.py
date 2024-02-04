@@ -1,3 +1,5 @@
+# /Vampiro/views/ProfileViews.py
+
 import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
@@ -11,8 +13,8 @@ from Vampiro.services.settings import get_game_status
 from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills
 from Vampiro.services.players import get_current_hunt, get_current_danger, get_number_round_kills, get_number_total_kills
 from Vampiro.services.disputes import get_death_accusation, get_duel_where_hunter, get_duel_where_prey, new_death_accusation, set_hunter_duel_response, set_prey_duel_response, get_current_dispute_by_hunter, get_current_dispute_by_prey
-from Vampiro.services.duels import  reached_agreement, finalise_duel
-
+from Vampiro.services.duel_resolution import  reached_agreement, finalise_duel
+from Vampiro.utils.security import handle_exceptions
 
 profile = Blueprint('admin', __name__)
 
@@ -35,8 +37,12 @@ def inject_game_status_and_user_role():
     user_role = current_user.role.name
     return dict(game_status=game_status, user_role=user_role)
 
+
+# PROFILE ______________________________________________________________________________________
+
 @profile.route('/')
 @profile.route('/role_selector')
+@handle_exceptions
 def role_selector():
     form = RoleSelectorForm()
     organizer_form = OrganizerForm()
@@ -57,6 +63,7 @@ def role_selector():
     return render_template('profile/role_selector.html')
 
 @profile.route('/my_stats')
+@handle_exceptions
 def my_stats():
 
     # Form setup
@@ -74,7 +81,8 @@ def my_stats():
         'total': get_number_total_kills(player.id)
     }
     disputes = {
-        'death_accusation': get_death_accusation(player.id),
+        'death_accusation_where_prey': get_death_accusation(player.id),
+        'death_accusation_where_hunter': get_death_accusation(prey.id),
         'duel_where_hunter': get_duel_where_hunter(player.id),
         'duel_where_prey': get_duel_where_prey(player.id)
     }
@@ -82,6 +90,7 @@ def my_stats():
     return render_template('profile/my_stats.html',death_accusation_form=death_accusation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, kills=kills, disputes=disputes)
 
 @profile.route('/my_stats/death_accusation', methods=['POST'])
+@handle_exceptions
 def death_accusation():
     form = DeathAccusationForm()
     player = current_user.player
@@ -90,8 +99,27 @@ def death_accusation():
         new_death_accusation(player.id)
     return redirect(url_for('profile.my_stats'))
 
+@profile.route('/my_stats/death_confirmation', methods=['POST'])
+@handle_exceptions
+def death_confirmation():
+    form = DeathAccusationForm
+    player = current_user.player
+
+    if form.validate_on_submit():
+
+        set_prey_initial_response(player.id, form.response.data)
+
+        if form.response.data == True:
+            
+        else:
+        
+        
+            pass
+    
+
 
 @profile.route('/my_stats/duel_response', methods=['POST'])
+@handle_exceptions
 def duel_response():
     form = DuelResponseForm()
 
@@ -114,6 +142,7 @@ def duel_response():
 
 
 @profile.route('/game_stats')
+@handle_exceptions
 def game_stats():
 
     jugadores_vivos = len(get_alive_players())
