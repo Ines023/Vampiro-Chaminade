@@ -4,9 +4,10 @@ import random
 from sqlalchemy import func
 
 from Vampiro.models import Hunt, Player, db
-from Vampiro.services.disputes import deactivate_dispute, finalise_duel, get_general_death_accusation, get_general_death_accusations, get_general_duels
+from Vampiro.services.disputes import deactivate_dispute, finalise_duel, get_general_death_accusation, get_general_death_accusations, get_general_disputes, get_general_duels
 from Vampiro.services.hunts import hunter_wins, new_hunt
-from Vampiro.utils.emails import send_new_round_hunt_email
+from Vampiro.services.settings import get_round_status, set_round_status
+from Vampiro.utils.emails import send_new_round_hunt_email, send_starvation_email
 
 # GAME GENERAL GETTERS _____________________________________________________________________
 
@@ -52,13 +53,14 @@ def get_unsuccessful_players(round_number):
 
 def deaths_from_starvation():
     """
-    Kills all players who didn't kill in the last round
+    Kills all players who didn't kill in the last round, and sends them an email
     """
     round_number = get_round_number()
     unsuccessful_players = get_unsuccessful_players(round_number)
 
     for player in unsuccessful_players:
         player.alive = False
+        send_starvation_email(player)
     db.session.commit()
 
 def generate_pairs():
@@ -85,20 +87,50 @@ def new_round():
 
 
 def process_round():
+    """
+    Processes the round only if the round status is TO_BE_FINALISED. If so, all hunters win death accusations, all duels are finalised and sets the round status to PROCESSED.
+    """
 
-    acusaciones_pendientes = get_general_death_accusations()
-    if acusaciones_pendientes:
-        for acusacion in acusaciones_pendientes:
-            hunter_wins(acusacion)
 
-    duelos_pendientes = get_general_duels()
-    if duelos_pendientes:
-        for duelo in duelos_pendientes:
-            finalise_duel(duelo)
+    round_status = get_round_status()
+    if round_status == 'TO_BE_FINALISED':
+
+        acusaciones_pendientes = get_general_death_accusations()
+        if acusaciones_pendientes:
+            for acusacion in acusaciones_pendientes:
+                hunter_wins(acusacion)
+
+        duelos_pendientes = get_general_duels()
+        if duelos_pendientes:
+            for duelo in duelos_pendientes:
+                finalise_duel(duelo)
+
+        deaths_from_starvation()
+
+        set_round_status('PROCESSED')
+    else:
+        pass
 
 def round_end():
-    
+    """
+    Executes at the end of the round. Checks if a dispute revision period is needed. If not, processes the round.
+    """
+
+
     disputas_pendientes = get_general_disputes()
     if disputas_pendientes:
-        for dispute in disputas_pendientes:
-            deactivate_dispute(dispute)
+        set_round_status('PENDING')
+    else:
+        set_round_status('TO_BE_FINALISED')
+    
+    process_round()
+
+def revision_period_done():
+    """
+    Executes at the end of the dispute revision period. If the revision period had been activated, it sets the round status to TO_BE_FINALISED and processes the round. If not, it doesn't do anything.
+    """
+    round_status = get_round_status()
+    if round_status == 'PENDING':
+        set_round_status('TO_BE_FINALISED')
+    
+    process_round()
