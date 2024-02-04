@@ -12,21 +12,7 @@ def get_player(room_number):
     player = Player.query.filter_by(room=room_number).first()
     return player
 
-def get_current_hunt(hunter_room):
-    """
-    Returns the current hunt object of a given hunter id
-    """
-    current_round = get_round_number()
-    current_hunt = Hunt.query.filter_by(round=current_round, room_hunter=hunter_room, success=False).first()
-    return current_hunt
 
-def get_current_danger(prey_room):
-    """
-    Returns the current hunt object of a given prey id
-    """
-    current_round = get_round_number()
-    current_danger = Hunt.query.filter_by(round=current_round, room_prey=prey_room, success=False).first()
-    return current_danger
 
 def get_number_round_kills(round_number, hunter_room):
     """
@@ -41,3 +27,15 @@ def get_number_total_kills(hunter_room):
     """
     total_kills = Hunt.query.filter_by(room_hunter=hunter_room, success=True).count()
     return total_kills
+
+
+
+# PLAYER SETTERS _____________________________________________________________________
+
+def kill(player):
+    """
+    Changes the alive property of the given player to False
+    """
+    player.alive = False
+    db.session.commit()
+

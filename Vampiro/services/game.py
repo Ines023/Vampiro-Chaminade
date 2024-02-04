@@ -1,7 +1,12 @@
 # Vampiro/services/game.py
+import random
+
 from sqlalchemy import func
 
 from Vampiro.models import Hunt, Player, db
+from Vampiro.services.disputes import deactivate_dispute, finalise_duel, get_general_death_accusation, get_general_death_accusations, get_general_duels
+from Vampiro.services.hunts import hunter_wins, new_hunt
+from Vampiro.utils.emails import send_new_round_hunt_email
 
 # GAME GENERAL GETTERS _____________________________________________________________________
 
@@ -43,7 +48,7 @@ def get_unsuccessful_players(round_number):
     return unsuccessful_players
 
 
-# GAME SETTERS ___________________________________________________________________________
+# GAME FUNCTIONS _________________________________________________________________________
 
 def deaths_from_starvation():
     """
@@ -56,13 +61,44 @@ def deaths_from_starvation():
         player.alive = False
     db.session.commit()
 
+def generate_pairs():
+    """
+    Returns a randomly shuffled list of hunter-prey pairs (tuples) of the alive players ids
+    """
+    alive_players = get_alive_players()
+    rooms = [player.room for player in alive_players]
+    random.shuffle(rooms)
+    pairs = [(rooms[i], rooms[(i+1) % len(rooms)]) for i in range(len(rooms))]
+    return pairs
+
 def new_round():
     """
-    Starts a new round
+    Generates new pairs, updates the hunt table with the new round number and pairs
     """
     new_round_number = get_round_number() + 1
     
+    round_pairs = generate_pairs()
+
+    for pair in round_pairs:
+        new_hunt(pair, new_round_number)
+        send_new_round_hunt_email(pair[0])
 
 
+def process_round():
 
-    return new_round
+    acusaciones_pendientes = get_general_death_accusations()
+    if acusaciones_pendientes:
+        for acusacion in acusaciones_pendientes:
+            hunter_wins(acusacion)
+
+    duelos_pendientes = get_general_duels()
+    if duelos_pendientes:
+        for duelo in duelos_pendientes:
+            finalise_duel(duelo)
+
+def round_end():
+    
+    disputas_pendientes = get_general_disputes()
+    if disputas_pendientes:
+        for dispute in disputas_pendientes:
+            deactivate_dispute(dispute)

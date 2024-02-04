@@ -15,3 +15,12 @@ def get_game_status():
     active_settings = get_active_settings()
     game_status = active_settings.game_status
     return game_status
+
+
+def set_game_status(status):
+    """
+    Changes the game status
+    """
+    active_settings = get_active_settings()
+    active_settings.game_status = status
+    db.session.commit()

@@ -8,12 +8,21 @@ class GameStatus(Enum):
     IN_PROGRESS = 'IN_PROGRESS'
     FINISHED = 'FINISHED'
 
+class RoundStatus(Enum):
+    PENDING = 'PENDING'
+    TO_BE_FINALISED = 'TO_BE_FINALISED'
+    PROCESSED = 'PROCESSED'
+
+class Mode(Enum):
+    VAMPIRO = 'VAMPIRO'
+    CUPIDO = 'CUPIDO'
+
 class Settings(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    active = db.Column(db.Boolean, default=True, nullable=False)
 
     mode = db.Column(db.String(80), nullable=False)
     game_status = db.Column(Enum(GameStatus), nullable=False)
+    round_status = db.Column(Enum(RoundStatus), nullable=False)
 
 

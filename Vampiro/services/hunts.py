@@ -2,22 +2,15 @@
 
 import datetime
 import random
-from .game import get_alive_players
+from Vampiro.services.disputes import deactivate_dispute
+
+from Vampiro.services.players import kill
+from .game import get_alive_players, get_round_number
 
 from Vampiro.database.mysql import db
 from Vampiro.models import Hunt
 
-# HUNTS _______________________________________________________________________
-
-def generate_pairs():
-    """
-    Returns a randomly shuffled list of hunter-prey pairs (tuples) of the alive players ids
-    """
-    alive_players = get_alive_players()
-    rooms = [player.room for player in alive_players]
-    random.shuffle(rooms)
-    pairs = [(rooms[i], rooms[(i+1) % len(rooms)]) for i in range(len(rooms))]
-    return pairs
+# HUNT CONSTRUCTOR _______________________________________________________________
 
 def new_hunt(hunt_pair, round_number):
     """
@@ -28,12 +21,26 @@ def new_hunt(hunt_pair, round_number):
     db.session.add(hunt)
     db.session.commit()
 
-def kill(player):
+
+# HUNT GETTERS _______________________________________________________________________
+
+def get_current_hunt(hunter_room):
     """
-    Changes the alive property of the given player to False
+    Returns the current hunt object of a given hunter id
     """
-    player.alive = False
-    db.session.commit()
+    current_round = get_round_number()
+    current_hunt = Hunt.query.filter_by(round=current_round, room_hunter=hunter_room, success=False).first()
+    return current_hunt
+
+def get_current_danger(prey_room):
+    """
+    Returns the current hunt object of a given prey id
+    """
+    current_round = get_round_number()
+    current_danger = Hunt.query.filter_by(round=current_round, room_prey=prey_room, success=False).first()
+    return current_danger
+
+# HUNT SETTERS ________________________________________________________________
 
 def hunt_success(hunt):
     """
@@ -44,9 +51,12 @@ def hunt_success(hunt):
 
 
 
+
+# HUNT FUNCTIONS ______________________________________________________________________
+
 def hunter_wins(dispute):
     """
-    Kills the victim, marks the hunt as a success, starts a new hunt.
+    Kills the victim, marks the hunt as a success, deactivates the dispute, starts a new hunt.
     """
     
     killer = dispute.hunt.hunter
@@ -55,5 +65,8 @@ def hunter_wins(dispute):
     new_pair = (killer.room, get_current_hunt(victim).room_prey)
     kill(victim)
     hunt_success(dispute.hunt)
+    deactivate_dispute(dispute)
 
     new_hunt(new_pair, get_round_number())
+
+    #prey wins no es una funcion ya que supone que el registro de caza se queda como estaba.
