@@ -1,9 +1,11 @@
 # Vampiro/models/UserModel.py
+from datetime import datetime
 from Vampiro.database.mysql import db
 from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from enum import Enum
 
 # APP USERS DATA _____________________________________________________________
 
@@ -93,6 +95,8 @@ class Player(db.Model):
     hunt_where_hunter = db.relationship('Hunt', backref='hunter', foreign_keys='Hunt.room_hunter')
     hunt_where_prey = db.relationship('Hunt', backref='prey', foreign_keys='Hunt.room_prey')
 
+    user = db.relationship('User', backref='player', uselist=False)
+
     @property
     def room(self):
         return self.id
@@ -111,6 +115,11 @@ class Hunt(db.Model):
     
     disputes = db.relationship('Dispute', backref='hunt')
 
+class Revision_Group(Enum):
+    DAY = 'DAY'
+    NIGHT = 'NIGHT'
+
+
 class Dispute(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     hunt_id = db.Column(db.Integer, db.ForeignKey('hunt.id'))
@@ -119,6 +128,14 @@ class Dispute(db.Model):
     hunter_duel_response = db.Column(db.Boolean)
     prey_duel_response = db.Column(db.Boolean)
     active = db.Column(db.Boolean, nullable=False)
+    revision_group = db.Column(db.Enum(Revision_Group), nullable=False)
+
+    def set_revision_group(self):
+        current_hour = datetime.now().hour
+        if 9 <= current_hour < 21:
+            self.revision_group = "DAY"
+        else:
+            self.revision_group = "NIGHT"
 
     @property
     def death_accusation(self):
@@ -154,5 +171,4 @@ class Dispute(db.Model):
         else:
             response = None
         return response
-
 

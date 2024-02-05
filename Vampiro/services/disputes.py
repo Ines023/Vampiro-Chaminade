@@ -14,6 +14,7 @@ def new_death_accusation(room_hunter):
     """
     Creates a new dispute for the hunter's current hunt.
     This dispute would classify as a death accusation.
+    It sets the revision group depending on the current hour.
     Sends an email to the prey.
     """
     # Database
@@ -23,6 +24,7 @@ def new_death_accusation(room_hunter):
     date = datetime.now().date()
 
     dispute = Dispute(hunt_id=hunt_id, date=date, prey_response=None, hunter_duel_response=None, prey_duel_response=None, active=True)
+    dispute.set_revision_group()
     db.session.add(dispute)
     db.session.commit()
 
@@ -34,25 +36,34 @@ def new_death_accusation(room_hunter):
 #-------- DISPUTE INSTANCE GETTERS -----------------------------------------------------
 #   GENERAL disputes depending on STAGE
 
-def get_general_disputes():
+def get_general_disputes(revision_group=None):
     """
     Returns all the active disputes
     """
-    disputes = Dispute.query.filter_by(active=True).all()
+    if revision_group:
+        disputes = Dispute.query.filter_by(active=True, revision_group=revision_group).all()
+    else:
+        disputes = Dispute.query.filter_by(active=True).all()
     return disputes
 
-def get_general_death_accusations():
+def get_general_death_accusations(revision_group=None):
     """
     Returns all the active death accusations
     """
-    death_accusations = Dispute.query.filter_by(active=True, death_accusation=True).all()
+    if revision_group:
+        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True, revision_group=revision_group).all()
+    else:
+        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True).all()
     return death_accusations
 
-def get_general_duels():
+def get_general_duels(revision_group=None):
     """
     Returns all the active duels
     """
-    duels = Dispute.query.filter_by(active=True, duel=True).all()
+    if revision_group:
+        duels = Dispute.query.filter_by(active=True, duel=True, revision_group=revision_group).all()
+    else:
+        duels = Dispute.query.filter_by(active=True, duel=True).all()
     return duels
 
 #   PLAYER SPECIFIC disputes where a player has hunter/prey role

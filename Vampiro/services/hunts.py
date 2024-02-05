@@ -5,7 +5,7 @@ import random
 from Vampiro.services.disputes import deactivate_dispute
 
 from Vampiro.services.players import kill
-from .game import get_alive_players, get_round_number
+from .game import game_over, get_alive_players, get_round_number
 
 from Vampiro.database.mysql import db
 from Vampiro.models import Hunt
@@ -67,6 +67,9 @@ def hunter_wins(dispute):
     hunt_success(dispute.hunt)
     deactivate_dispute(dispute)
 
-    new_hunt(new_pair, get_round_number())
+    if get_alive_players().length <= 1:
+        game_over()
+    else:
+        new_hunt(new_pair, get_round_number())
 
-    #prey wins no es una funcion ya que supone que el registro de caza se queda como estaba.
+#prey wins no es una funcion ya que supone que el registro de caza se queda como estaba.

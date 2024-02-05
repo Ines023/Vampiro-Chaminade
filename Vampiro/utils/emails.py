@@ -96,7 +96,7 @@ def send_new_round_hunt_email(player):
 
     subject = "Empieza una nueva noche"
     message = render_template('emails/new_round.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -104,20 +104,29 @@ def send_starvation_email(player):
         
     subject = "Muerto... de hambre"
     message = render_template('emails/starvation.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
-
+def send_deadline_extension_email(player, ganador=None):
+        
+        subject = "Te doy una noche más"
+        if ganador:
+            message = render_template('emails/game_over_with_winner.html', ganador=ganador)
+        else:
+            message = render_template('emails/game_over_without_winner.html')
+        recipient = player.user.email
+    
+        send_email(subject, message, recipient)
 
 
 #   DISPUTE: START
     
-def send_death_accusation_email(user):
+def send_death_accusation_email(player):
 
     subject = "¿Aquí termina todo?¿En serio?"
-    message = render_template('emails/death_accusation.html', user=user)
-    recipient = user.email
+    message = render_template('emails/death_accusation.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -127,7 +136,7 @@ def send_hunt_success_email(player):
 
     subject = "Tu sed de sangre no tiene final"
     message = render_template('emails/hunt_success.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -135,7 +144,7 @@ def send_victim_death_email(player):
 
     subject = "Adiós, mundo cruel"
     message = render_template('emails/victim_death.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -145,7 +154,7 @@ def send_duel_started_email(player):
 
     subject = "Tienes un duelo esta noche"
     message = render_template('emails/duel_started.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -155,7 +164,7 @@ def send_duel_hunter_win_email(player):
 
     subject = "Victoria a medianoche"
     message = render_template('emails/duel_hunter_win.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
     
@@ -163,23 +172,23 @@ def send_duel_prey_win_email(player):
 
     subject = "Victoria a medianoche"
     message = render_template('emails/duel_prey_win.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 def send_duel_hunter_loss_email(player):
 
-    subject = "A las 00:00 pasaste a mejor vida"
+    subject = "A medianoche pasaste a mejor vida"
     message = render_template('emails/duel_hunter_loss.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 def send_duel_prey_loss_email(player):
 
-    subject = "A las 00:00 pasaste a mejor vida"
+    subject = "A medianoche pasaste a mejor vida"
     message = render_template('emails/duel_prey_loss.html', player=player)
-    recipient = player.email
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 

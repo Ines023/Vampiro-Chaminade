@@ -5,14 +5,16 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 from Vampiro.models.SettingsModel import GameStatus
+from Vampiro.services.hunts import hunter_wins
+from Vampiro.utils.emails import send_duel_started_email, send_hunt_success_email, send_victim_death_email
 
-from Vampiro.utils.forms import DeathAccusationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm
+from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm
 
 from Vampiro.services.users import change_role
-from Vampiro.services.settings import get_game_status
+from Vampiro.services.settings import get_game_status, get_round_status
 from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills
 from Vampiro.services.players import get_current_hunt, get_current_danger, get_number_round_kills, get_number_total_kills
-from Vampiro.services.disputes import get_death_accusation, get_duel_where_hunter, get_duel_where_prey, new_death_accusation, set_hunter_duel_response, set_prey_duel_response, get_current_dispute_by_hunter, get_current_dispute_by_prey
+from Vampiro.services.disputes import get_death_accusation, get_duel_where_hunter, get_duel_where_prey, new_death_accusation, set_hunter_duel_response, set_prey_duel_response, get_current_dispute_by_hunter, get_current_dispute_by_prey, set_prey_initial_response
 from Vampiro.services.duel_resolution import  reached_agreement, finalise_duel
 from Vampiro.utils.security import handle_exceptions
 
@@ -21,6 +23,9 @@ profile = Blueprint('admin', __name__)
 @profile.before_request
 @login_required
 def check_game_status_and_role():
+    """
+    Redirects the user to the appropriate page based on the game status and the user's role.    
+    """
     game_status = get_game_status()
     if current_user.role.name == 'admin':
         return redirect(url_for('admin.dashboard'))
@@ -34,8 +39,9 @@ def check_game_status_and_role():
 @profile.context_processor
 def inject_game_status_and_user_role():
     game_status = get_game_status()
+    round_status = get_round_status()
     user_role = current_user.role.name
-    return dict(game_status=game_status, user_role=user_role)
+    return dict(game_status=game_status, user_role=user_role, round_status=round_status)
 
 
 # PROFILE ______________________________________________________________________________________
@@ -92,6 +98,11 @@ def my_stats():
 @profile.route('/my_stats/death_accusation', methods=['POST'])
 @handle_exceptions
 def death_accusation():
+    """
+    Handles the form submission for the death accusation form.
+    If the hunter informs of a murder, the victim will be asked over email to report.
+    """
+
     form = DeathAccusationForm()
     player = current_user.player
 
@@ -102,25 +113,37 @@ def death_accusation():
 @profile.route('/my_stats/death_confirmation', methods=['POST'])
 @handle_exceptions
 def death_confirmation():
-    form = DeathAccusationForm
+    """
+    Handles the form submission for the death confirmation form.
+    If the prey confirms the death, the hunter wins the dispute, gets a new hunt and emails are sent.
+    If the prey denies the death, the hunter is informed and the dispute becomes a duel, its revision group is updated.
+    """
+
+
+    form = DeathConfirmationForm
     player = current_user.player
 
     if form.validate_on_submit():
 
         set_prey_initial_response(player.id, form.response.data)
+        dispute = get_current_dispute_by_prey(player.id)
 
         if form.response.data == True:
-            
+            hunter_wins(dispute)
+            send_hunt_success_email(dispute.hunter.user)
+            send_victim_death_email(player)
         else:
-        
-        
-            pass
+            dispute.set_revision_group()
+            send_duel_started_email(dispute.hunter.user)
     
-
-
 @profile.route('/my_stats/duel_response', methods=['POST'])
 @handle_exceptions
 def duel_response():
+    """
+    Handles the form submission for the duel response form.
+    If both players agree on the duel, the dispute is finalised.
+    If not in time, it will be handled by the automatic revision every 12 hours."""
+
     form = DuelResponseForm()
 
     if form.validate_on_submit():
