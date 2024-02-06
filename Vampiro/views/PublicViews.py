@@ -54,6 +54,8 @@ def login():
     else:
         handle_form_errors(form)
 
+    return render_template('public/signup_and_login/login.html', form=form)
+
 @public.route('/logout')
 @handle_exceptions
 def logout():
@@ -162,4 +164,4 @@ def reset_password_token(token):
 
 @public.route('/test')
 def test():
-    return render_template('email/layout_email_compatible.html')
+    return render_template('email/layout_email_compatible.html', user=current_user)

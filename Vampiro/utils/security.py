@@ -15,8 +15,10 @@ def handle_exceptions(f):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            if current_user.is_authenticated:
+            if current_user:
                 jugador = current_user
+            else:
+                jugador = "Alguien random"
             pagina = request.path
             return error_management(e, jugador=jugador, pagina=pagina)
     return decorated_function
@@ -34,4 +36,4 @@ def error_management(e, jugador="Alguien random", pagina="desconocida"):
     except:
         flash('¡Ha saltado un error inesperado! Avisa a algún organizador. Error: ' + str(e), 'danger') 
      
-    return redirect(url_for('home'))
+    return redirect(url_for('public.home'))

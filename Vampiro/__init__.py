@@ -24,8 +24,7 @@ def create_app(config_class=Config, test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    
-    app.config['DEBUG'] = True
+
 
     # LOGIN MANAGER ____________________________________________________________
     login_manager.init_app(app)
@@ -77,7 +76,5 @@ def create_app(config_class=Config, test_config=None):
             db.session.add(admin)
 
         db.session.commit()
-
-
 
     return app
