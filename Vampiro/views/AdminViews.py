@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
-from Vampiro.models import Cronicas
+from Vampiro.models.NewsletterModel import Cronicas
 from Vampiro.utils.forms import NewCronicaForm
 from Vampiro.services.admin_actions import add_cronica
 from Vampiro.utils.security import handle_exceptions

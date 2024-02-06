@@ -25,6 +25,8 @@ def create_app(config_class=Config, test_config=None):
     except OSError:
         pass
     
+    app.config['DEBUG'] = True
+
     # LOGIN MANAGER ____________________________________________________________
     login_manager.init_app(app)
     from Vampiro.models.UserModel import User
@@ -54,6 +56,11 @@ def create_app(config_class=Config, test_config=None):
 
     with app.app_context():
         db.create_all()
+
+        # Initial setting creation
+        if Settings.query.count() == 0:
+            settings = Settings( mode='VAMPIRO', game_status='NOT_STARTED', round_status='PROCESSED')
+            db.session.add(settings)
 
         # Check if roles already exist
         if Role.query.count() == 0:

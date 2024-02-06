@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #000000;
+        }
+
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .header img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .footer {
+            background-color: #130b15;
+            padding: 20px;
+            color: white;
+            text-align: right;
+        }
+
+        .footer a {
+            color: #a7a7a7;
+            text-decoration: none;
+        }
+
+        .footer img {
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td class="header" align="center">
+                <img src="{{ url_for('static', filename='img/email_header.png') }}" alt="El vampiro, título sobre fondo de cementerio">
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                <p>Hello,</p>
+                <p>This is a test email.</p>
+                <p>Best regards,<br>Your Name</p>
+            </td>
+
+
+            <section style="background-color: #130b15;">
+                <div class="container pb-5 h-100">
+                  <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12 col-m-8">
+                        
+                        <div style="position: relative;">
+                            <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}" style="max-width: 40%; position: absolute; bottom: 0; right: 2%;" alt="Retrato de vampiro">
+                        </div>
+            
+            
+                        <div id="dialogo">
+                            <div id="nombre">
+                                <p style="margin: 0;">Conde drácula</p>
+                            </div>
+            
+            
+                            <p>{{ user.name }}<br>Ya estás registrado y confirmado.<br>Te acaba de caer una maldición encima. Y de las malas.<br>Pronto vendrá la sed de sangre, no tengas piedad.</p>
+            
+            
+                        </div>
+            
+            
+            
+                    </div>
+                  </div>
+                </div>
+            </section>
+
+
+        </tr>
+        <tr>
+            <td class="footer">
+                <a href="mailto:auladejuegos@gmail.com">auladejuegos@gmail.com</a>
+                <br>
+                <img src="{{ url_for('static', filename='img/logo_juegos_pequeñito.png') }}" alt="Aula de juegos logo">
+            </td>
+        </tr>
+    </table>
+</body>

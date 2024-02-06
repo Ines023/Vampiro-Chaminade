@@ -1,4 +1,5 @@
 # Vampiro/models/NewsletterModel.py
+from Vampiro.database.mysql import db
 
 class Cronicas(db.Model):
 

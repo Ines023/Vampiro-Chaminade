@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo,  NumberRange
 
-from Vampiro.models import User
+from Vampiro.models.UserModel import User
 
 
 # ___ VALIDATORS _________________________________________________________________

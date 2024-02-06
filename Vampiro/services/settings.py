@@ -1,7 +1,7 @@
 # /Vampiro/services/settings.py
 
 from Vampiro.database.mysql import db
-from models import Settings
+from Vampiro.models.SettingsModel import Settings
 
 # SETTINGS GETTERS _________________________________________________________________________
 

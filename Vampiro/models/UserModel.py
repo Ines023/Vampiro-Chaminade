@@ -1,11 +1,13 @@
 # Vampiro/models/UserModel.py
 from datetime import datetime
-from Vampiro.database.mysql import db
+import time
 from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from authlib.jose import jwt
 from enum import Enum
+
+from Vampiro.database.mysql import db
 
 # APP USERS DATA _____________________________________________________________
 
@@ -44,34 +46,30 @@ class User(db.Model, UserMixin):
         self.password_hashed = generate_password_hash(plaintext)
 
     def get_confirmation_token(self, expires_sec=1800):
-            s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
-            return s.dumps({'confirm_email': self.id}).decode('utf-8')
+        header = {"alg": "HS256"}
+        payload = {"exp": time.time() + expires_sec, "confirm_email": self.id}
+        return jwt.encode(header, payload, current_app.config['SECRET_KEY'])
 
     def get_reset_token(self, expires_sec=1800):
-        s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
-        return s.dumps({'reset_password': self.id}).decode('utf-8')
-    
+        header = {"alg": "HS256"}
+        payload = {"exp": time.time() + expires_sec, "reset_password": self.id}
+        return jwt.encode(header, payload, current_app.config['SECRET_KEY'])
+
     @staticmethod
     def verify_confirmation_token(token):
-        """
-        Returns the user if the token is valid, None otherwise
-        """
-        s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            user_id = s.loads(token)['confirm_email']
-        except:
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'])
+            user_id = payload['confirm_email']
+        except (jwt.JWTError, KeyError):
             return None
         return User.query.get(user_id)
 
     @staticmethod
     def verify_reset_token(token):
-        """
-        Returns the user if the token is valid, None otherwise
-        """
-        s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            user_id = s.loads(token)['reset_password']
-        except:
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'])
+            user_id = payload['reset_password']
+        except (jwt.JWTError, KeyError):
             return None
         return User.query.get(user_id)
 
@@ -94,8 +92,6 @@ class Player(db.Model):
     
     hunt_where_hunter = db.relationship('Hunt', backref='hunter', foreign_keys='Hunt.room_hunter')
     hunt_where_prey = db.relationship('Hunt', backref='prey', foreign_keys='Hunt.room_prey')
-
-    user = db.relationship('User', backref='player', uselist=False)
 
     @property
     def room(self):

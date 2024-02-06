@@ -1,16 +1,364 @@
 # Vampiro/services/game.py
 import random
+from datetime import datetime
 
 from sqlalchemy import func
 
-from Vampiro.models import Hunt, Player, db
-from Vampiro.services.disputes import deactivate_dispute, finalise_duel, get_general_death_accusation, get_general_death_accusations, get_general_disputes, get_general_duels
-from Vampiro.services.hunts import hunter_wins, new_hunt
-from Vampiro.services.players import kill
+from Vampiro.database.mysql import db
+from Vampiro.models.UserModel import Hunt, Player, Dispute
 from Vampiro.services.settings import get_round_status, set_round_status
-from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_new_round_hunt_email, send_starvation_email
+from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
 
-# GAME GENERAL GETTERS _____________________________________________________________________
+
+# INDEX
+
+# PLAYER FUNCTIONS
+#       - player constructor
+#       - player getters
+#       - player setters
+
+# GAME FUNCTIONS
+#       - game general getters
+#       - temporalisation
+
+# HUNT FUNCTIONS
+#       - hunt constructor
+#       - hunt getters
+#       - hunt setters
+#       - hunt resolution functions
+
+# DISPUTE FUNCTIONS
+#       - dispute constructor
+#       - dispute getters
+#       - dispute setters
+#       - duel functions
+
+# GAME END
+
+
+
+
+# PLAYER FUNCTIONS _________________________________________________________________________
+
+# PLAYER CONSTRUCTOR - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def new_player(user_id):
+    """
+    Creates a new player with the given room number
+    """
+    player = Player(id=user_id, alive=True)
+    db.session.add(player)
+    db.session.commit()
+
+# PLAYER GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def get_player(room_number):
+    """
+    Returns a player object given a room number
+    """
+    player = Player.query.filter_by(room=room_number).first()
+    return player
+
+def get_number_round_kills(round_number, hunter_room):
+    """
+    Returns the total number of kills in a round by a given hunter
+    """
+    round_kills = Hunt.query.filter_by(round=round_number, room_hunter=hunter_room, success=True).count()
+    return round_kills
+
+def get_number_total_kills(hunter_room):
+    """
+    Returns the total number of kills in the whole game by a given hunter
+    """
+    total_kills = Hunt.query.filter_by(room_hunter=hunter_room, success=True).count()
+    return total_kills
+
+# PLAYER SETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def kill(player):
+    """
+    Changes the alive property of the given player to False
+    """
+    player.alive = False
+    db.session.commit()
+
+
+# HUNT FUNCTIONS ______________________________________________________________________
+
+# HUNT CONSTRUCTOR  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def new_hunt(hunt_pair, round_number):
+    """
+    Creates a new hunt with the given pair of player ids and a round number
+    """
+    date = datetime.now().date()
+    hunt = Hunt(date=date, round=round_number, room_hunter=hunt_pair[0], room_prey=hunt_pair[1], success=False)
+    db.session.add(hunt)
+    db.session.commit()
+
+
+# HUNT GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def get_current_hunt(hunter_room):
+    """
+    Returns the current hunt object of a given hunter id
+    """
+    current_round = get_round_number()
+    current_hunt = Hunt.query.filter_by(round=current_round, room_hunter=hunter_room, success=False).first()
+    return current_hunt
+
+def get_current_danger(prey_room):
+    """
+    Returns the current hunt object of a given prey id
+    """
+    current_round = get_round_number()
+    current_danger = Hunt.query.filter_by(round=current_round, room_prey=prey_room, success=False).first()
+    return current_danger
+
+# HUNT SETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def hunt_success(hunt):
+    """
+    Changes the success property of the given hunt to True
+    """
+    hunt.success = True
+    db.session.commit()
+
+# HUNT RESOLUTION FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def hunter_wins(dispute):
+    """
+    Kills the victim, marks the hunt as a success, deactivates the dispute, starts a new hunt.
+    """
+    
+    killer = dispute.hunt.hunter
+    victim = dispute.hunt.prey
+
+    new_pair = (killer.room, get_current_hunt(victim).room_prey)
+    kill(victim)
+    hunt_success(dispute.hunt)
+    deactivate_dispute(dispute)
+
+    if get_alive_players().length <= 1:
+        game_over()
+    else:
+        new_hunt(new_pair, get_round_number())
+
+#prey wins no es una funcion ya que supone que el registro de caza se queda como estaba.
+
+
+# DISPUTE CONSTRUCTOR - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def new_death_accusation(room_hunter):
+    """
+    Creates a new dispute for the hunter's current hunt.
+    This dispute would classify as a death accusation.
+    It sets the revision group depending on the current hour.
+    Sends an email to the prey.
+    """
+    # Database
+    hunt = get_current_hunt(room_hunter)
+
+    hunt_id = hunt.id
+    date = datetime.now().date()
+
+    dispute = Dispute(hunt_id=hunt_id, date=date, prey_response=None, hunter_duel_response=None, prey_duel_response=None, active=True)
+    dispute.set_revision_group()
+    db.session.add(dispute)
+    db.session.commit()
+
+    #Email
+    send_death_accusation_email(hunt.prey.user)
+
+# DISPUTE GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+#-------- DISPUTE INSTANCE GETTERS -----------------------------------------------------
+#   GENERAL disputes depending on STAGE
+
+def get_general_disputes(revision_group=None):
+    """
+    Returns all the active disputes
+    """
+    if revision_group:
+        disputes = Dispute.query.filter_by(active=True, revision_group=revision_group).all()
+    else:
+        disputes = Dispute.query.filter_by(active=True).all()
+    return disputes
+
+def get_general_death_accusations(revision_group=None):
+    """
+    Returns all the active death accusations
+    """
+    if revision_group:
+        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True, revision_group=revision_group).all()
+    else:
+        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True).all()
+    return death_accusations
+
+def get_general_duels(revision_group=None):
+    """
+    Returns all the active duels
+    """
+    if revision_group:
+        duels = Dispute.query.filter_by(active=True, duel=True, revision_group=revision_group).all()
+    else:
+        duels = Dispute.query.filter_by(active=True, duel=True).all()
+    return duels
+
+#   PLAYER SPECIFIC disputes where a player has hunter/prey role
+
+def get_current_dispute_by_hunter(room_hunter):
+    """
+    Returns the active dispute where the player is the hunter
+    """
+    dispute = Dispute.query.join(Hunt).filter(Hunt.room_hunter == room_hunter, Dispute.active == True).first()
+    return dispute
+
+def get_current_dispute_by_prey(room_prey):
+    """
+    Returns the active dispute where the player is the prey
+    """
+    dispute = Dispute.query.join(Hunt).filter(Hunt.room_prey == room_prey, Dispute.active == True).first()
+    return dispute
+
+
+#   Disputes depending on the STAGE they are in and the player's role
+
+def get_death_accusation(room_prey):
+    """
+    Returns the active death accusation where the player is the prey
+    """
+    dispute = get_current_dispute_by_prey(room_prey)
+
+    if dispute.death_accusation == True:
+        return dispute
+    else:
+        return None
+
+def get_duel_where_hunter(room_hunter):
+    """
+    Returns the active duel where the player is the hunter
+    """
+    dispute = get_current_dispute_by_hunter(room_hunter)
+
+    if dispute.duel == True:
+        return dispute
+    else:
+        return None
+
+def get_duel_where_prey(room_prey):
+    """
+    Returns the active duel where the player is the prey
+    """
+    dispute = get_current_dispute_by_prey(room_prey)
+
+    if dispute.duel == True:
+        return dispute
+    else:
+        return None
+
+
+# DISPUTE SETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def set_prey_initial_response(room_prey, response):
+    """
+    Sets the initial response of the prey to the death accusation
+    """
+    dispute = get_current_dispute_by_prey(room_prey)
+    dispute.prey_response = response
+    db.session.commit()
+
+def set_hunter_duel_response(dispute, response):
+    """
+    Sets the response of the hunter to the duel
+    """
+    dispute.hunter_duel_response = response
+    db.session.commit()
+
+def set_prey_duel_response(dispute, response):
+    """
+    Sets the response of the prey to the duel
+    """
+    dispute.prey_duel_response = response
+    db.session.commit()
+
+def deactivate_dispute(dispute):
+    """
+    Sets the active status of the dispute to False
+    """
+    dispute.active = False
+    db.session.commit()
+
+
+
+
+# DUEL FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def reached_agreement(dispute):
+    """
+    Returns True if both players have agreed on a response, False otherwise
+    """
+    if dispute.agreed_response == None:
+        reached = False
+    else:
+        reached = True
+    return reached
+
+def random_duel_winner(dispute):
+    """
+    Returns a random winner (player object) for the duel
+    """
+    winner = random.choice([dispute.hunt.hunter, dispute.hunt.prey])
+    return winner
+
+def duel_winner(dispute):
+    """
+    Returns the winner (player object) of the duel
+    """
+    if reached_agreement(dispute) == True:
+        if dispute.agreed_response == True:
+            winner = dispute.hunt.hunter
+        else:
+            winner = dispute.hunt.prey
+    else:
+        winner = random_duel_winner(dispute)
+    return winner
+
+
+
+def finalise_duel(dispute):
+    
+    """
+    Determines the duel winner, modifies the hunt registry as proceeded, sends emails and desactivates the dispute
+    """
+    winner = duel_winner(dispute)
+
+    killer = dispute.hunt.hunter
+    victim = dispute.hunt.prey
+
+
+    if winner == killer:
+        hunter_wins(dispute)
+        
+        send_duel_hunter_win_email(killer)
+        send_duel_prey_loss_email(victim)
+    else:
+        # prey wins
+
+        send_duel_hunter_loss_email(killer)
+        send_duel_prey_win_email(victim)
+
+    deactivate_dispute(dispute)
+
+
+
+
+
+
+
+# GAME FUNCTIONS _____________________________________________________________________
+    
+# GAME GENERAL GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 def get_alive_players():
     """
@@ -50,10 +398,9 @@ def get_unsuccessful_players(round_number):
     return unsuccessful_players
 
 
-# GAME FUNCTIONS _________________________________________________________________________
+# TEMPORALISATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-
-# Routinary dispute management - - - - - - - - - - - - - - - - AT 11AM AND 11PM
+# Routinary dispute management ---------------------------------- AT 11AM AND 11PM
 
 def death_accusation_revision(revision_group):
     acusaciones_pendientes = get_general_death_accusations(revision_group=revision_group)
@@ -78,7 +425,7 @@ def dispute_revision(revision_group):
     death_accusation_revision(revision_group)
     duel_revision(revision_group)
 
-# Routinary round management - - - - - - - - - - - - - - - - 
+# Routinary round management ---------------------------------- AT 12AM AND 12PM
     
 def deaths_from_starvation():
     """
@@ -169,6 +516,16 @@ def revision_period_done():
         set_round_status('TO_BE_FINALISED')
     
     process_round()
+
+
+# GAME START _________________________________________________________________________
+    
+def start_game():
+    # Set game status to IN_PROGRESS
+    # Creates Player objects for all users with the player role
+    # Creates the first round of hunts
+    # Starts temporalisation
+    pass
 
 
 # GAME END _________________________________________________________________________

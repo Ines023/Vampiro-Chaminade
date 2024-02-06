@@ -5,20 +5,16 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 from Vampiro.models.SettingsModel import GameStatus
-from Vampiro.services.hunts import hunter_wins
 from Vampiro.utils.emails import send_duel_started_email, send_hunt_success_email, send_victim_death_email
 
 from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm
 
 from Vampiro.services.users import change_role
 from Vampiro.services.settings import get_game_status, get_round_status
-from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills
-from Vampiro.services.players import get_current_hunt, get_current_danger, get_number_round_kills, get_number_total_kills
-from Vampiro.services.disputes import get_death_accusation, get_duel_where_hunter, get_duel_where_prey, new_death_accusation, set_hunter_duel_response, set_prey_duel_response, get_current_dispute_by_hunter, get_current_dispute_by_prey, set_prey_initial_response
-from Vampiro.services.duel_resolution import  reached_agreement, finalise_duel
+from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills, get_current_danger, get_current_hunt, get_number_round_kills, get_number_total_kills, new_death_accusation, get_death_accusation, get_duel_where_hunter, get_duel_where_prey, set_prey_initial_response, reached_agreement, finalise_duel, set_hunter_duel_response, set_prey_duel_response, hunter_wins, get_current_dispute_by_prey, get_current_dispute_by_hunter
 from Vampiro.utils.security import handle_exceptions
 
-profile = Blueprint('admin', __name__)
+profile = Blueprint('profile', __name__)
 
 @profile.before_request
 @login_required

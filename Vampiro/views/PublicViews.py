@@ -4,13 +4,14 @@ from flask import Blueprint, current_app, render_template, request, redirect, ur
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
 
-from Vampiro.models import Cronicas, User
+from Vampiro.models.UserModel import User
+from Vampiro.models.NewsletterModel import Cronicas
 from Vampiro.utils.forms import LoginForm, handle_form_errors, SignUpForm, EmailForm, NewPasswordForm
 from Vampiro.utils.emails import send_confirmation_instructions_email, send_welcome_email, send_password_reset_instructions_email, send_password_changed_email
 from Vampiro.services.users import add_user, confirm_user, update_password
 from Vampiro.utils.security import handle_exceptions
 
-public = Blueprint('admin', __name__)
+public = Blueprint('public', __name__)
 
 @public.route('/')
 @public.route('/home')
@@ -155,3 +156,10 @@ def reset_password_token(token):
         handle_form_errors(form)
 
     return render_template('public/reset/reset_password_token.html', form=form, token=token)
+
+
+# TESTS ______________________________________________________________________
+
+@public.route('/test')
+def test():
+    return render_template('email/layout_email_compatible.html')

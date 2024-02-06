@@ -1,6 +1,10 @@
 # Vampiro/models/SettingsModel.py
-from sqlalchemy import Enum
+from enum import Enum
 from Vampiro.database.mysql import db
+
+class Mode(Enum):
+    VAMPIRO = 'VAMPIRO'
+    CUPIDO = 'CUPIDO'
 
 class GameStatus(Enum):
     NOT_STARTED = 'NOT_STARTED'
@@ -13,16 +17,13 @@ class RoundStatus(Enum):
     TO_BE_FINALISED = 'TO_BE_FINALISED'
     PROCESSED = 'PROCESSED'
 
-class Mode(Enum):
-    VAMPIRO = 'VAMPIRO'
-    CUPIDO = 'CUPIDO'
 
 class Settings(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    mode = db.Column(db.String(80), nullable=False)
-    game_status = db.Column(Enum(GameStatus), nullable=False)
-    round_status = db.Column(Enum(RoundStatus), nullable=False)
+    mode = db.Column(db.Enum(Mode), nullable=False)
+    game_status = db.Column(db.Enum(GameStatus), nullable=False)
+    round_status = db.Column(db.Enum(RoundStatus), nullable=False)
 
 
