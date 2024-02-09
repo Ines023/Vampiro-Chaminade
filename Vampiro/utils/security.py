@@ -1,10 +1,44 @@
 #/Vampiro/utils/security.py
-from flask import flash, request, redirect, url_for
+from flask import flash, request, redirect, url_for, current_app
 from flask_login import current_user
 from .emails import send_error_email
+from authlib.jose import jwt
+from authlib.jose.errors import BadSignatureError, ExpiredTokenError
 
+from Vampiro.models.UserModel import User
 
 from functools import wraps
+
+# TOKEN HANDLERS ______________________________________________________________________________________
+
+
+def verify_confirmation_token(token):
+    try:
+        private_key = current_app.config['SECRET_KEY']
+        claims = jwt.decode(token, private_key)
+        claims.validate() 
+        user_id = claims['confirm_email']
+    except BadSignatureError:
+        flash("Tu link de confirmación no es válido.", "danger")
+        return None
+    except ExpiredTokenError:
+        flash("Tu link de confirmación ha caducado.", "warning")
+        return None
+    return User.query.get(user_id)
+
+def verify_reset_token(token):
+    try:
+        private_key = current_app.config['SECRET_KEY']
+        claims = jwt.decode(token, private_key)
+        claims.validate() 
+        user_id = claims['reset_password']
+    except BadSignatureError:
+        flash("Tu link de cambio de contraseña no es válido.", "danger")
+        return None
+    except ExpiredTokenError:
+        flash("Tu link de cambio de contraseña ha caducado.", "warning")
+        return None
+    return User.query.get(user_id)
 
 # ERROR HANDLERS ______________________________________________________________________________________
 

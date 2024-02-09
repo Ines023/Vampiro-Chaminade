@@ -54,7 +54,7 @@ def handle_form_errors(form):
         
 class SignUpForm(FlaskForm):
     name = StringField('Nombre y Apellidos', validators=[DataRequired(message='Debes introducir tu nombre'), Length(min=1, max=80)])
-    room = IntegerField('Habitación', validators=[DataRequired(message='Debes introducir un número de habitación'), NumberRange(min=100, max=900), Unique(User, User.room, message='Ya hay un jugador con esta habitación')])
+    room = IntegerField('Habitación', validators=[DataRequired(message='Debes introducir un número de habitación'), NumberRange(min=100, max=900), Unique(User, User.id, message='Ya hay un jugador con esta habitación')])
     email = StringField('Email', validators=[DataRequired(message='Debes introducir un email'), Email(message='Por favor introduce un email válido'), Length(min=1, max=120), Unique(User, User.email, message='Ya hay un jugador con este email')])
     password = PasswordField('Password',validators=[DataRequired(message='Debes introducir una contraseña'),Length(min=8, max=128, message='Tu contraseña debe tener al menos 8 caracteres')])
     confirm_password = PasswordField('Confirma la contraseña', validators=[DataRequired(message='Debes confirmar tu contraseña'), EqualTo('password', message='Las contraseñas deben coincidir')])
@@ -63,7 +63,7 @@ class SignUpForm(FlaskForm):
 # FORM: INICIO DE SESIÓN
 
 class LoginForm(FlaskForm):
-    room = IntegerField('Habitación', validators=[DataRequired(message='Debes introducir un número de habitación'), NumberRange(min=100, max=900), Registered(User, User.room, message='No hay ningún jugador con esa habitación')])
+    room = IntegerField('Habitación', validators=[DataRequired(message='Debes introducir un número de habitación'), NumberRange(min=100, max=900), Registered(User, User.id, message='No hay ningún jugador con esa habitación')])
     password = PasswordField('Password', validators=[DataRequired(message='Debes introducir tu contraseña')])
     remember_me = BooleanField('Recuérdame') 
     submit = SubmitField('Iniciar Sesión')  

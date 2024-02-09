@@ -28,17 +28,17 @@
                         {{ role_selector_form.csrf_token }}
                         <button type="submit" name="response" value="player" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">¡Me muero de ganas!</button>
                     </form>
-                    {% elseif user_role == "player" %}
+                    {% elif user_role == "player" %}
                     <p class="m-2 p-3 h4 pixel-text">Lo tenemos apuntado, quieres jugar. ¡Te avisaremos pronto!</p>
                     <form method="POST" action="{{ url_for('profile.role_selector') }}">
                         {{ role_selector_form.csrf_token }}
                         <button type="submit" name="response" value="visitor" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">Mejor no...</button>
                     </form>
-                    {endif %}
+                    {% endif %}
 
-                {% elseif game_status == "IN_PROGRESS" %}
+                {% elif game_status == "IN_PROGRESS" %}
                     <p class="m-2 p-3 h4 pixel-text">La partida ya ha comenzado.</p>
-                {% elseif game_status == "FINISHED" %}
+                {% elif game_status == "FINISHED" %}
                   <p class="m-2 p-3 h4 pixel-text">La última partida ha terminado, por ahora no estamos preparando una nueva.</p>
                 {% else %}
                     <p class="m-2 p-3 h4 pixel-text"> No estamos preparando ninguna partida.</p>

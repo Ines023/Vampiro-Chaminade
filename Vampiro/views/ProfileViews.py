@@ -64,6 +64,22 @@ def role_selector():
         
     return render_template('profile/role_selector.html')
 
+@profile.route('/organizer')
+@handle_exceptions
+def check_organizer_password():
+    form = OrganizerForm()
+
+    if form.validate_on_submit():
+        if form.password.data == os.getenv('ADMIN_CODE'):
+            role = 'organizer'
+            change_role(current_user, role)
+
+            return redirect(url_for('admin/dashboard.html'))
+
+    return redirect(url_for('profile/role_selector'))
+
+# GAME ______________________________________________________________________________________
+
 @profile.route('/my_stats')
 @handle_exceptions
 def my_stats():

@@ -28,7 +28,7 @@
         <li class="nav-item">
           {{ nav_link('profile.role_selector', 'Jugar') }}
         </li>
-        {% elseif user_role == "player" and game_status == "IN_PROGRESS" %}
+        {% elif user_role == "player" and game_status == "IN_PROGRESS" %}
         <li class="nav-item">
           {{ nav_link('profile.my_stats', 'Mis stats') }}
         </li>

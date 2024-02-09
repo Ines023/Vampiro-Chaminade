@@ -11,7 +11,7 @@ def add_user(form):
     Adds a new user to the database and returns it
     """
 
-    new_user = User(email=form.email.data, password=form.password.data, name=form.name.data, active=True)
+    new_user = User(id=form.room.data ,email=form.email.data, password=form.password.data, name=form.name.data, active=True)
     
     user_role = Role.query.filter_by(name='visitor').first()
     if user_role:

@@ -70,7 +70,7 @@ def create_app(config_class=Config, test_config=None):
         # Check if admin user already exists
         if User.query.filter_by(name='Dracula').first() is None:
             admin_role = Role.query.filter_by(name='admin').first()
-            id=999
+            id=900
 
             admin = User(id=id, name='Dracula', password=os.getenv('ADMIN_PASSWORD'), email=os.getenv('ADMIN_EMAIL'), active=True, confirmed_at=datetime.now().date(), role=admin_role)
             db.session.add(admin)

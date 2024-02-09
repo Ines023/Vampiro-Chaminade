@@ -36,8 +36,21 @@
                 <h1>¡Ya casi está!</h1>
                 <br>
                 <p>Solo te queda confirmar tu correo. Por favor comprueba tu bandeja de entrada (y tu carpeta de spam) - deberías haber recibido un correo con un enlace de confirmación.</p>
-                <p>¿No te ha llegado el correo? <a class="text-danger" href="{{ url_for('public.resend_confirmation') }}">Prueba otra vez</a>.</p>
-
+                <p>¿No te ha llegado el correo? Prueba otra vez.</p>
+                
+                <form action="{{ url_for('public.resend_confirmation') }}" method="post">
+                  <!-- Email input -->
+                  <div class="form-outline form-white">
+                      {{ form.email.label }}: {{ form.email (class="form-control form-control-lg")}}
+                    </div>
+  
+                    <!-- Security token -->
+                    {{ form.csrf_token }}
+                  </div>
+  
+                  <!-- Submit button -->
+                  {{ form.submit(class_="btn btn-danger btn-block mb-4") }}
+                  </form>
 
               </div>
             </div>

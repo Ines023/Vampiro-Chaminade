@@ -1,5 +1,6 @@
 # /Vampiro/views/PublicViews.py
 
+from urllib.parse import unquote_plus
 from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
@@ -9,7 +10,7 @@ from Vampiro.models.NewsletterModel import Cronicas
 from Vampiro.utils.forms import LoginForm, handle_form_errors, SignUpForm, EmailForm, NewPasswordForm
 from Vampiro.utils.emails import send_confirmation_instructions_email, send_welcome_email, send_password_reset_instructions_email, send_password_changed_email
 from Vampiro.services.users import add_user, confirm_user, update_password
-from Vampiro.utils.security import handle_exceptions
+from Vampiro.utils.security import handle_exceptions, verify_confirmation_token, verify_reset_token
 
 public = Blueprint('public', __name__)
 
@@ -17,6 +18,7 @@ public = Blueprint('public', __name__)
 @public.route('/home')
 @handle_exceptions
 def home():
+    print (User.query.first())
     return render_template('public/home.html')
 
 @public.route('/normas')
@@ -40,7 +42,7 @@ def login():
 
     if request.method == 'POST' and form.validate_on_submit():
 
-        user = User.query.filter_by(room=form.room.data).first()
+        user = User.query.filter_by(id=form.room.data).first()
 
         if user and check_password_hash(user.password_hashed, form.password.data):
             if user.confirmed:
@@ -97,15 +99,15 @@ def resend_confirmation():
                 flash('Se han reenviado las instrucciones de confirmación a tu correo.', 'success')
     else:
         handle_form_errors(form)
-    return render_template('public/resend_confirmation.html', form=form)
+    return render_template('public/signup_and_login/pending_activation.html', form=form)
 
 @public.route('/confirm/<token>')
 @handle_exceptions
 def confirm(token):
 
-    user = user.verify_confirmation_token(token)
+    decoded_token = unquote_plus(token)
+    user = verify_confirmation_token(decoded_token)
     if not user:
-        flash('Tu código de confirmación no es válido o ha caducado.', 'danger')
         return redirect(url_for('public.resend_confirmation'))
     if user.confirmed:
         flash ('Mejor más que menos, pero tu cuenta ya estaba confirmada. No hace falta RE-confirmar. ¡Puedes iniciar sesión si quieres!', 'success')
@@ -141,10 +143,11 @@ def reset_password():
 @public.route('/reset-password/<token>', methods=['GET', 'POST'])
 @handle_exceptions
 def reset_password_token(token):
-    user = user.verify_reset_token(token)
+
+    decoded_token = unquote_plus(token)
+    user = verify_reset_token(decoded_token)
 
     if not user:
-        flash('Tu código de confirmación no es válido o ha caducado.', 'danger')
         return redirect(url_for('public.reset_password'))
     
     form = NewPasswordForm() #Reset password form

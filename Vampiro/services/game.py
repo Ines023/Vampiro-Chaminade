@@ -56,7 +56,7 @@ def get_player(room_number):
     """
     Returns a player object given a room number
     """
-    player = Player.query.filter_by(room=room_number).first()
+    player = Player.query.filter_by(id=room_number).first()
     return player
 
 def get_number_round_kills(round_number, hunter_room):
@@ -471,7 +471,9 @@ def new_round():
 
     for pair in round_pairs:
         new_hunt(pair, new_round_number)
-        send_new_round_hunt_email(pair[0])
+        hunter = get_player(pair[0])
+        prey = get_player(pair[1])
+        send_new_round_hunt_email(hunter, prey)
 
 
 def process_round():

@@ -48,30 +48,16 @@ class User(db.Model, UserMixin):
     def get_confirmation_token(self, expires_sec=1800):
         header = {"alg": "HS256"}
         payload = {"exp": time.time() + expires_sec, "confirm_email": self.id}
-        return jwt.encode(header, payload, current_app.config['SECRET_KEY'])
+        private_key = current_app.config['SECRET_KEY']
+        return jwt.encode(header, payload, private_key)
 
     def get_reset_token(self, expires_sec=1800):
         header = {"alg": "HS256"}
         payload = {"exp": time.time() + expires_sec, "reset_password": self.id}
-        return jwt.encode(header, payload, current_app.config['SECRET_KEY'])
+        private_key = current_app.config['SECRET_KEY']
+        return jwt.encode(header, payload, private_key)
 
-    @staticmethod
-    def verify_confirmation_token(token):
-        try:
-            payload = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user_id = payload['confirm_email']
-        except (jwt.JWTError, KeyError):
-            return None
-        return User.query.get(user_id)
-
-    @staticmethod
-    def verify_reset_token(token):
-        try:
-            payload = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user_id = payload['reset_password']
-        except (jwt.JWTError, KeyError):
-            return None
-        return User.query.get(user_id)
+    
 
 class Role(db.Model):
     """ Posibles roles:
