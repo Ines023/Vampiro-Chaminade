@@ -17,6 +17,9 @@ class RoundStatus(Enum):
     TO_BE_FINALISED = 'TO_BE_FINALISED'
     PROCESSED = 'PROCESSED'
 
+class ExtensionStatus(Enum):
+    EXTENDED = 'EXTENDED'
+    NOT_EXTENDED = 'NOT_EXTENDED'
 
 class Settings(db.Model):
 
@@ -25,5 +28,6 @@ class Settings(db.Model):
     mode = db.Column(db.Enum(Mode), nullable=False)
     game_status = db.Column(db.Enum(GameStatus), nullable=False)
     round_status = db.Column(db.Enum(RoundStatus), nullable=False)
+    extension_status = db.Column(db.Enum(ExtensionStatus), nullable=False)
 
 

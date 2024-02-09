@@ -1,6 +1,0 @@
-{{ user.name }}
-
-Ya he cambiado tu contraseña. Quédate con ella esta vez.
-
-A cazar,
-Conde Drácula.

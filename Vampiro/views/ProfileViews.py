@@ -126,11 +126,14 @@ def death_confirmation():
 
         if form.response.data == True:
             hunter_wins(dispute)
-            send_hunt_success_email(dispute.hunter.user)
-            send_victim_death_email(player)
+            hunter = dispute.hunt.hunter
+            dead_victim = dispute.hunt.prey
+            next_victim = get_current_hunt(hunter.id).prey
+            send_hunt_success_email(hunter, next_victim)
+            send_victim_death_email(dead_victim)
         else:
             dispute.set_revision_group()
-            send_duel_started_email(dispute.hunter.user)
+            send_duel_started_email(dispute.hunter, dispute.revision_group)
     
 @profile.route('/my_stats/duel_response', methods=['POST'])
 @handle_exceptions

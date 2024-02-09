@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import Hunt, Player, Dispute
-from Vampiro.services.settings import get_round_status, set_round_status
+from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_round_status
 from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
 
 
@@ -167,8 +167,9 @@ def new_death_accusation(room_hunter):
     db.session.add(dispute)
     db.session.commit()
 
+
     #Email
-    send_death_accusation_email(hunt.prey.user)
+    send_death_accusation_email(hunt.prey,dispute.revision_group)
 
 # DISPUTE GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -431,14 +432,17 @@ def deaths_from_starvation():
     """
     Kills all players who didn't kill in the last round, and sends them an email.
     If all players didn't kill, it sends them all an email with a last chance.
+    This only happens once, controlled by the extension_status variable.
     """
     round_number = get_round_number()
     unsuccessful_players = get_unsuccessful_players(round_number)
     jugadores_vivos = get_alive_players()
+    extension_status = get_extension_status()
 
-    if unsuccessful_players.length == jugadores_vivos.length:
+    if unsuccessful_players.length == jugadores_vivos.length and extension_status == 'NOT_EXTENDED':
         for player in unsuccessful_players:
             send_deadline_extension_email(player)
+        set_extension_status('EXTENDED')
     else:  
         for player in unsuccessful_players:
             kill(player)

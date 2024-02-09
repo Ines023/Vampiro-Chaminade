@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Una vez retumbaron las campanas de media noche, viste acercarse a quien poco antes intentó matarte. Con velocidad lo dejaste herido, inmóvil en cuestión de segundos. Es posible que vuelva a intentar hacerte daño... pero ahora podrás estar atento.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Has ganado el duelo de medianoche, el intento de asesinato es oficialmente fallido. Ahora cuentas con la ventaja de conocer a tu cazador.</p>
+{% endblock %}

@@ -27,6 +27,14 @@ def get_round_status():
     round_status = settings.round_status
     return round_status
 
+def get_extension_status():
+    """
+    Returns the extension status: EXTENDED, NOT_EXTENDED
+    """
+    settings = get_settings()
+    extension_status = settings.extension_status
+    return extension_status
+
 # SETTINGS SETTERS _________________________________________________________________________
 
 def set_mode(mode):
@@ -51,4 +59,12 @@ def set_round_status(round_status):
     """
     settings = get_settings()
     settings.round_status = round_status
+    db.session.commit()
+
+def set_extension_status(extension_status):
+    """
+    Changes the extension status: EXTENDED, NOT_EXTENDED
+    """
+    settings = get_settings()
+    settings.extension_status = extension_status
     db.session.commit()

@@ -3,7 +3,6 @@
 
 <head>
     <style>
-          
         td {
             background-color: #130b15;
             border: none;
@@ -52,12 +51,17 @@
             padding: 10px 20px 20px 40px;
             margin: 20px;
             margin-top: 0;
-            color:rgb(255, 215, 35);
+            color: rgb(255, 215, 35);
         }
 
         .name-cell {
             vertical-align: bottom;
+            color: rgb(255, 215, 35);
 
+        }
+
+        #anotacion {
+            color: #a7a7a7;
         }
 
         .name-style {
@@ -80,6 +84,22 @@
         .inline-middle {
             display: inline-block;
             vertical-align: middle;
+        }
+
+
+        .button-cell {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .button {
+            width: 50%;
+            margin: auto;
+            padding: 10px 20px;
+            background-color: rgb(255, 215, 35);
+            color: #130b15;
+
+            text-align: center;
         }
 
         .footer a {
@@ -111,28 +131,50 @@
                                 <p class="name-style">Conde drácula</p>
                             </td>
                             <td class="image-cell">
-                                <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+                                {% block dialogue_avatar %}
+                                <img src="{{ url_for('static', filename='img/vampiro/beso.gif') }}"
                                     alt="Retrato de vampiro" class="image-style">
+                                {% endblock %}
                             </td>
                         </tr>
                     </table>
                 </div>
                 <div class="dialogue-block">
-                    <p>{{ user.name }}<br>Ya estás registrado y confirmado.<br>Te acaba de caer una maldición encima. Y
-                        de las malas.<br>Pronto vendrá la sed de sangre, no tengas duda.<br>Y cuando llegue, aquí
-                        estaremos para ayudarte.</p>
+                    {% block dialogue_text%}
+                    <p>Inés al habla, este correo no debería haberte llegado así, whoops.<br> Escribe a un organizador.</p>
+                    {% endblock %}
                 </div>
             </td>
         </tr>
-        <td class="footer">
-            <div class="inline-middle">
-                <a href="mailto:auladejuegos@gmail.com" class="email-style">auladejuegos@gmail.com</a>
-            </div>
-            <div class="inline-middle">
-                <img src="{{ url_for('static', filename='img/logo_juegos_pequeñito.png') }}" alt="Aula de juegos logo"
-                    class="image-style">
-            </div>
-        </td>
+
+        <tr>
+            <td class="button-cell">
+                {% block action_button %}
+                    <p>Haz click en el botón para absolutamente nada.</p>
+
+                    <a href="https://www.youtube.com/watch?v=3G34u6Ctfzw" style="text-decoration: none; color: white;">
+                        <div class="button">
+                            <p>¡Pero si no hace nada!</p>
+                        </div>
+                    </a>
+
+                    <p id="anotacion">No entiendo cómo ha llegado esto a tu bandeja de entrada<br>PD: Has perdido el juego, y no, no hablo del Vampiro</p>
+                {% endblock %}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="footer">
+                <div class="inline-middle">
+                    <a href="mailto:auladejuegos@gmail.com" class="email-style">auladejuegos@gmail.com</a>
+                </div>
+                <div class="inline-middle">
+                    <img src="{{ url_for('static', filename='img/logo_juegos_pequeñito.png') }}"
+                        alt="Aula de juegos logo" class="image-style">
+                </div>
+            </td>
         </tr>
     </table>
 </body>
+
+

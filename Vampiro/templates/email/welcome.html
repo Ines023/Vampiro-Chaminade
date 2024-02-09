@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ user.name }}<br>Ya estás registrado y confirmado.<br>Te acaba de caer una maldición encima. Y
+        de las malas.<br>Pronto vendrá la sed de sangre, no habrá tiempo de dudar.<br>Recuerda, solo puede quedar uno.</p>
+{% endblock %}
+
+{% block action_button %}
+{% endblock %}

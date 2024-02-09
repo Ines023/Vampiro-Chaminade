@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>No recuerdas como ocurrió, pero cuando volviste a abrir los ojos estabas herido y con una gran herida en el torso. Aún así, brillaba en tus ojos la determinación de venganza.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Has perdido el duelo de medianoche. Tu víctima se mantiene, el intento de asesinato es oficialmente fallido. Deberás arreglartelas si quieres comer una vez más.</p>
+{% endblock %}

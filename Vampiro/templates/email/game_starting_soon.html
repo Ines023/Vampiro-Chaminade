@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/beso.gif') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ user.name }}<br>Ha vuelto la maldición que lleva siglos persiguiendo al Chaminade.<br>Aquellos expuestos a los horrores de la noche no tendrán escapatoria.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Se está preparando una partida, ¡asegúrate de unirte antes de que empiece!</p>
+{% endblock %}

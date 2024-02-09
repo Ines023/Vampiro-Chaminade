@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Arrastrándote por los pasillos, observas una tenue luz que se hace cada vez mayor.<br>La hambruna distorsiona tus sentidos, y poco a poco te encuentras cada vez más deslumbrado.<br>Hace una semana que no comes, y aparentemente, no podrás hacerlo nunca más.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Has muerto de inanición, aquí termina tu partida.<br>¡Gracias por jugar!</p>
+{% endblock %}

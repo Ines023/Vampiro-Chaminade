@@ -7,8 +7,9 @@
 
 
 {% block dialogue_text %}
-    <p>{{ user.name }}<br>Ya he cambiado tu contraseña.<br>Que no se te olvide.</p>
+    <p>{{ player.user.name }}<br>¿Aquí acabará todo?<br>Tu cazador dice haberte matado, ¿es eso cierto?</p>
 {% endblock %}
 
 {% block action_button %}
+    <p>Tienes hasta las {{ hora }} para confirmar/discrepar, si no, el cazador ganará automáticamente. De ahí no hay vuelta atrás.</p>
 {% endblock %}

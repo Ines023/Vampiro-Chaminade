@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Los recuerdos son difusos en el más allá. Fue una bestia, una sombra... algo te cogió desprevenido. Desde ahora vagarás los recovecos del Chaminado como un alma atormentada que nunca se desprendió de su maldición.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Has perdido el duelo de medianoche. Tu partida termina aquí.</p>
+{% endblock %}

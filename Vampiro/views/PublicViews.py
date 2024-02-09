@@ -162,6 +162,6 @@ def reset_password_token(token):
 
 # TESTS ______________________________________________________________________
 
-@public.route('/test')
-def test():
-    return render_template('email/layout_email_compatible.html', user=current_user)
+@public.route('/test/<pagina>')
+def test(pagina):
+    return render_template('email/'+pagina+'.html', user=current_user)

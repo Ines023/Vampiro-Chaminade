@@ -1,52 +1,23 @@
-{% extends "/security/email/layout_email.html" %}
+{% extends "/email/layout_email_compatible.html" %}
 
-{% block title %}{% endblock %}
-
-{% block header %}
-{{super()}}
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
 {% endblock %}
 
-{% block navbar %}{% endblock %}
 
-{% block content %}
-<section style="background-color: #130b15;">
-    <div class="container pb-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-12 col-m-8">
-            
-            <div style="position: relative;">
-                <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}" style="max-width: 40%; position: absolute; bottom: 0; right: 2%;" alt="Retrato de vampiro">
-            </div>
+{% block dialogue_text %}
+    <p>Hola {{ user.name }}<br>Debería beber hasta la última gota de tu sangre por liarla así...<br>En el botón de abajo puedes enmendar tu error con una contraseña nueva, ¡pero que no vuelva a ocurrir!</p>
+{% endblock %}
 
+{% block action_button%}
+<p>Haz click en el botón para cambiar tu contraseña.</p>
 
-            <div id="dialogo">
-                <div id="nombre">
-                    <p style="margin: 0;">Conde drácula</p>
-                </div>
-
-
-                <p>Hola {{ user.name }}<br>Debería beber hasta la última gota de tu sangre por liarla así...<br>En el botón de abajo puedes enmendar tu error con una contraseña nueva, ¡pero que no vuelva a ocurrir!</p>
-
-
-            </div>
-
-
-            <div class="text-center">
-                <a class="btn btn-warning pixel-text m-4 px-5" style="font-size: max(2.5vw, 20px); max-width: 80%;" href="{{ url_for_security('reset_password', token=token, _external=True) }}">ESCOGE UNA NUEVA CONTRASEÑA</a>
-                
-                <div class="pixel-text" style="color: #a7a7a7; font-size: 2vw;">
-                </div>
-            
-            </div>
-
-
-
-        </div>
-      </div>
+<a href="{{ url_for('public.reset_password_token', token=token, _external=True) }}" style="text-decoration: none; color: white;">
+    <div class="button">
+        <p>¡Volver a la web!</p>
     </div>
-</section>
-{% endblock %}
+</a>
 
-{% block footer %}
-{{super()}}
+<p id="anotacion">Si no has solicitado este correo puedes ignorarlo</p>
 {% endblock %}
