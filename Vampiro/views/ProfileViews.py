@@ -7,7 +7,7 @@ from flask_login import login_required, current_user
 from Vampiro.models.SettingsModel import GameStatus
 from Vampiro.utils.emails import send_duel_started_email, send_hunt_success_email, send_victim_death_email
 
-from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm
+from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm, handle_form_errors
 
 from Vampiro.services.users import change_role
 from Vampiro.services.settings import get_game_status, get_round_status
@@ -23,12 +23,14 @@ def check_game_status_and_role():
     Redirects the user to the appropriate page based on the game status and the user's role.    
     """
     game_status = get_game_status()
-    if current_user.role.name == 'admin':
+    role = current_user.role
+
+    if role.name == 'admin':
         return redirect(url_for('admin.dashboard'))
-    elif current_user.role.name == 'visitor' or game_status != GameStatus.IN_PROGRESS:
+    elif role.name == 'visitor' or game_status != GameStatus.IN_PROGRESS:
         if request.endpoint != 'profile.role_selector':
             return redirect(url_for('profile.role_selector'))
-    elif current_user.role.name == 'player' and game_status == GameStatus.IN_PROGRESS:
+    elif role.name == 'player' and game_status == GameStatus.IN_PROGRESS:
         if request.endpoint == 'profile.role_selector':
             return redirect(url_for('profile.my_stats'))
 
@@ -42,41 +44,38 @@ def inject_game_status_and_user_role():
 
 # PROFILE ______________________________________________________________________________________
 
-@profile.route('/')
-@profile.route('/role_selector')
+@profile.route('/', methods=['GET', 'POST'])
+@profile.route('/role_selector', methods=['GET', 'POST'])
 @handle_exceptions
 def role_selector():
-    form = RoleSelectorForm()
+    role_selector_form = RoleSelectorForm()
     organizer_form = OrganizerForm()
 
-    if form.validate_on_submit():
-        role = form.role.data
-        change_role(current_user, role)
+    if role_selector_form.validate_on_submit() and role_selector_form.form_name.data == 'role_selector_form':
+        role = role_selector_form.role.data
+        if role == 'visitor':
+            role_id = 3
+        elif role == 'player':
+            role_id = 2
+        change_role(current_user, role_id)
 
-        return redirect(url_for('profile/role_selector.html'))
+        return redirect(url_for('profile.role_selector'))
 
-    if organizer_form.validate_on_submit():
+    if organizer_form.validate_on_submit() and organizer_form.form_name.data == 'organizer_form':
         if organizer_form.password.data == os.getenv('ADMIN_CODE'):
-            role = 'organizer'
-            change_role(current_user, role)
+            #id for admin role, using names was giving issues
+            admin=1
+            print(admin)
+            change_role(current_user, admin)
 
-            return redirect(url_for('admin/dashboard.html'))
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('El código no es correcto', 'warning')
+            return redirect(url_for('profile.role_selector'))
+    else:
+        handle_form_errors(organizer_form)
         
-    return render_template('profile/role_selector.html')
-
-@profile.route('/organizer')
-@handle_exceptions
-def check_organizer_password():
-    form = OrganizerForm()
-
-    if form.validate_on_submit():
-        if form.password.data == os.getenv('ADMIN_CODE'):
-            role = 'organizer'
-            change_role(current_user, role)
-
-            return redirect(url_for('admin/dashboard.html'))
-
-    return redirect(url_for('profile/role_selector'))
+    return render_template('profile/role_selector.html', form = role_selector_form, organizer_form = organizer_form)
 
 # GAME ______________________________________________________________________________________
 

@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-    role = db.relationship('Role', backref='users')
+    role = db.relationship('Role', backref='users', lazy='joined')
 
     player = db.relationship('Player', backref='user', uselist=False)
   
@@ -60,7 +60,8 @@ class User(db.Model, UserMixin):
     
 
 class Role(db.Model):
-    """ Posibles roles:
+    """
+    Posibles roles:
         - admin
         - player
         - visitor

@@ -85,12 +85,14 @@ class NewPasswordForm(FlaskForm):
     
 class RoleSelectorForm(FlaskForm):
     role = StringField('Rol')
+    form_name = HiddenField(default='role_selector_form')
 
 # FORM: IDENTIFICARSE COMO ORGANIZADOR
     
 class OrganizerForm(FlaskForm):
     password = PasswordField('Contraseña', validators=[DataRequired(message='Debes introducir la clave'), Length(min=1, max=128)])
     submit = SubmitField('Enviar')
+    form_name = HiddenField(default='organizer_form')
     
 # FORM: ACCIONES DE LOS JUGADORES
     

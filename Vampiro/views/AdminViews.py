@@ -20,10 +20,50 @@ def check_role():
 
 
 # ADMIN ______________________________________________________________________________________
+
+@admin.route('/dashboard')
+@handle_exceptions
+def dashboard():   
+
+    form = NewCronicaForm(request.form)
     
+    if request.method == 'POST' and form.validate_on_submit():
+        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
+        add_cronica(cronica)
+        return redirect(url_for('admin.cronicas'))
+                
+    return render_template('admin/new_cronica.html', form=form)
+
+@admin.route('/dashboard')
+@handle_exceptions
+def disputas():   
+
+    form = NewCronicaForm(request.form)
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
+        add_cronica(cronica)
+        return redirect(url_for('admin.cronicas'))
+                
+    return render_template('admin/new_cronica.html', form=form)
+
+@admin.route('/dashboard')
+@handle_exceptions
+def settings():   
+
+    form = NewCronicaForm(request.form)
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
+        add_cronica(cronica)
+        return redirect(url_for('admin.cronicas'))
+                
+    return render_template('admin/new_cronica.html', form=form)
+
+
 @admin.route('/cronicas')
 @handle_exceptions
-def admin_cronicas():   
+def cronicas():   
 
     form = NewCronicaForm(request.form)
     

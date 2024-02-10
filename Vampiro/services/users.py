@@ -2,6 +2,8 @@
 
 import datetime
 
+from flask import flash
+
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import User, Role
 
@@ -18,6 +20,7 @@ def add_user(form):
         new_user.role = user_role
 
     db.session.add(new_user)
+    db.session.flush()  # Flush the session to update the role relationship
     db.session.commit()
     return new_user
 
@@ -32,15 +35,30 @@ def confirm_user(user):
 
 # ROLE MANAGEMENT _______________________________________________________________________
 
-def change_role(user, role_name):
+def role_to_dict(role):
+    return {
+        'id': role.id,
+        'name': role.name,
+        'description': role.description
+    }
+
+
+
+def change_role(user, id):
     """
-    Changes the role of a user
+    Changes the role of a user:
+        - admin
+        - player
+        - visitor
     """
-    role = Role.query.filter_by(name=role_name).first()
-    user.role = role
-    
-    db.session.add(user)
-    db.session.commit()
+    role = Role.query.filter_by(id=id).first()
+    if role:
+        user.role = role
+        
+        db.session.add(user)
+        db.session.commit()
+    else:
+        flash('role no encontrado','danger')
 
 # PASSWORD MANAGEMENT _______________________________________________________________________
     
