@@ -222,6 +222,12 @@ def get_current_dispute_by_prey(room_prey):
     dispute = Dispute.query.join(Hunt).filter(Hunt.room_prey == room_prey, Dispute.active == True).first()
     return dispute
 
+def get_dispute_by_id(dispute_id):
+    """
+    Returns the dispute object with the given id
+    """
+    dispute = Dispute.query.filter_by(id=dispute_id).first()
+    return dispute
 
 #   Disputes depending on the STAGE they are in and the player's role
 
@@ -352,7 +358,25 @@ def finalise_duel(dispute):
     deactivate_dispute(dispute)
 
 
+def admin_intervention(dispute, winner):
+    """
+    Determines the winner of the duel, modifies the hunt registry as proceeded, sends emails and desactivates the dispute
+    """
 
+    killer = dispute.hunt.hunter
+    victim = dispute.hunt.prey
+
+    if winner == 'Hunter':
+        hunter_wins(dispute)
+                
+        send_duel_hunter_win_email(killer)
+        send_duel_prey_loss_email(victim)
+    elif winner == 'Prey':
+        # prey wins
+        send_duel_hunter_loss_email(dispute.hunt.hunter)
+        send_duel_prey_win_email(dispute.hunt.prey)
+
+    deactivate_dispute(dispute)
 
 
 
@@ -398,6 +422,82 @@ def get_unsuccessful_players(round_number):
 
     return unsuccessful_players
 
+
+# GAME HUNT GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+def get_hunts_filtered(round_filter=None, room_filter=None, date_filter=None, success_filter=None, order_by=None):
+    """
+    Returns a list of hunts filtered by the given parameters
+    
+    round_filter: int
+    room_filter: int
+    date_filter: string (YYYY-MM-DD)
+    successful_filter: bool
+    order_by: string  ('date', 'round', 'success')
+    """
+    hunts_query = Hunt.query
+    
+    if round_filter is not None:
+        hunts_query = hunts_query.filter_by(round=round_filter)
+
+    if room_filter is not None:
+        hunts_query = hunts_query.filter_by(room_hunter=room_filter)
+        hunts_query = hunts_query.filter_by(room_prey=room_filter)
+
+    if date_filter:
+        date = datetime.strptime(date_filter, '%Y-%m-%d')
+        hunts_query = hunts_query.filter(Hunt.date == date)
+
+    if success_filter is not None:
+        hunts_query = hunts_query.filter_by(success=success_filter)
+
+    if order_by is not None:
+        if order_by == 'date':
+            hunts_query = hunts_query.order_by(Hunt.date.desc())
+        elif order_by == 'round':
+            hunts_query = hunts_query.order_by(Hunt.round.desc())
+        elif order_by == 'success':
+            hunts_query = hunts_query.order_by(Hunt.success.desc())
+
+    return hunts_query
+
+def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=None, prey_filter=None, active_filter=None, order_by=None):
+    """
+    Returns a list of disputes filtered by the given parameters
+
+    round_filter: int
+    hunter_filter: int
+    prey_filter: int
+    active_filter: string
+    order_by: string  ('date', 'round', 'active')
+    """
+
+    disputes_query = Dispute.query
+
+    if round_filter is not None:
+        disputes_query = disputes_query.filter_by(round=round_filter)
+
+    if hunt_filter is not None:
+        disputes_query = disputes_query.filter_by(hunt_id=hunt_filter)
+
+    if hunter_filter is not None:
+        disputes_query = disputes_query.filter(Hunt.room_hunter == hunter_filter)
+    
+    if prey_filter is not None:
+        disputes_query = disputes_query.filter(Hunt.room_prey == prey_filter)
+
+    if active_filter:
+        disputes_query = disputes_query.filter(Dispute.active == active_filter)
+    
+    if order_by is not None:
+        if order_by == 'date':
+            hunts_query = hunts_query.order_by(Hunt.date.desc())
+        elif order_by == 'round':
+            hunts_query = hunts_query.order_by(Hunt.round.desc())
+        elif order_by == 'active':
+            hunts_query = hunts_query.order_by(Hunt.active.desc())
+
+    return disputes_query
 
 # TEMPORALISATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -501,7 +601,6 @@ def round_end():
     If not, processes the round.
     """
 
-
     disputas_pendientes = get_general_disputes()
     if disputas_pendientes:
         set_round_status('PENDING')
@@ -527,7 +626,6 @@ def revision_period_done():
 # GAME START _________________________________________________________________________
     
 def start_game():
-    # Set game status to IN_PROGRESS
     # Creates Player objects for all users with the player role
     # Creates the first round of hunts
     # Starts temporalisation

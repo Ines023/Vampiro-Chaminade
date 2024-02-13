@@ -4,9 +4,11 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from Vampiro.models.NewsletterModel import Cronicas
-from Vampiro.utils.forms import NewCronicaForm
+from Vampiro.utils.forms import NewCronicaForm, DisputeInterventionForm, SettingsForm, handle_form_errors
 from Vampiro.services.admin_actions import add_cronica
 from Vampiro.utils.security import handle_exceptions
+from Vampiro.services.settings import get_game_status, get_mode, set_mode, set_game_status
+from Vampiro.services.game import admin_intervention, get_alive_players, get_dispute_by_id, get_disputes_filtered, get_hunts_filtered, get_round_number, get_general_number_round_kills
 
 admin = Blueprint('admin', __name__)
 
@@ -24,41 +26,69 @@ def check_role():
 @admin.route('/dashboard')
 @handle_exceptions
 def dashboard():   
+    game_mode = get_mode()
+    game_status = get_game_status()
+    jugadores_vivos = len(get_alive_players())
+    ronda_actual = get_round_number()
+    muertos_ronda =  get_general_number_round_kills(ronda_actual)
 
-    form = NewCronicaForm(request.form)
-    
-    if request.method == 'POST' and form.validate_on_submit():
-        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
-        add_cronica(cronica)
-        return redirect(url_for('admin.cronicas'))
+    return render_template('admin/dashboard.html', game_mode=game_mode, game_status=game_status, jugadores_vivos=jugadores_vivos, ronda_actual=ronda_actual, muertos_ronda=muertos_ronda)
                 
-    return render_template('admin/new_cronica.html', form=form)
 
-@admin.route('/dashboard')
+@admin.route('/cazas', methods=['GET'])
 @handle_exceptions
-def disputas():   
+def cazas():
+    page = request.args.get('page', 1, type=int)
+    round_filter = request.args.get('round', type=int)
+    player_filter = request.args.get('player', type=int)
+    date_filter = request.args.get('date')
+    success_filter = request.args.get('success')
+    order_by = request.args.get('order_by')
 
-    form = NewCronicaForm(request.form)
-    
-    if request.method == 'POST' and form.validate_on_submit():
-        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
-        add_cronica(cronica)
-        return redirect(url_for('admin.cronicas'))
-                
-    return render_template('admin/new_cronica.html', form=form)
+    hunts_query = get_hunts_filtered(round_filter, player_filter, date_filter, success_filter, order_by)
 
-@admin.route('/dashboard')
+    hunts = hunts_query.paginate(page=page, per_page=10, error_out=False, count=True)
+
+    return render_template('admin/cazas.html', hunts=hunts)
+
+
+@admin.route('/disputas')
 @handle_exceptions
-def settings():   
+def disputas(): 
+    page = request.args.get('page', 1, type=int)
+    round_filter = request.args.get('round', type=int)
+    hunt_filter = request.args.get('hunt_id', type=int)
+    hunter_filter = request.args.get('hunter', type=int)
+    prey_filter = request.args.get('prey', type=int)
+    active_filter = request.args.get('active')
+    order_by = request.args.get('order_by')
 
-    form = NewCronicaForm(request.form)
-    
-    if request.method == 'POST' and form.validate_on_submit():
-        cronica = Cronicas(date=form.date.data, title=form.title.data, content=form.content.data)
-        add_cronica(cronica)
-        return redirect(url_for('admin.cronicas'))
+    disputas_query = get_disputes_filtered(round_filter, hunt_filter, hunter_filter, prey_filter, active_filter, order_by)
+
+    disputas = disputas_query.paginate(page=page, per_page=10, error_out=False, count=True)
+
+    form = DisputeInterventionForm()
+
+    return render_template('admin/disputas.html', disputas=disputas, form=form)  
+
+
+@admin.route('/dispute_intervention', methods=['POST'])
+@handle_exceptions
+def dispute_intervention():   
+
+    form = DisputeInterventionForm()
+
+    if form.validate_on_submit():
+        dispute_id = form.dispute_id.data
+        response = form.response.data
+
+        dispute = get_dispute_by_id(dispute_id)
+
+        admin_intervention(dispute, response)
+    else:
+        handle_form_errors(form)
                 
-    return render_template('admin/new_cronica.html', form=form)
+    return redirect(url_for('admin.disputas'))
 
 
 @admin.route('/cronicas')
@@ -73,3 +103,20 @@ def cronicas():
         return redirect(url_for('public.cronicas'))
                 
     return render_template('admin/new_cronica.html', form=form)
+
+@admin.route('/settings', methods=['GET', 'POST'])
+def settings():
+    form = SettingsForm()
+
+    if request.method == 'POST':
+
+        if form.validate_on_submit():
+
+            game_mode = form.game_mode.data
+            game_status = form.game_status.data
+
+            set_mode(game_mode)
+            set_game_status(game_status)
+            flash ('Cambios guardados', 'success')
+
+    return render_template('admin/settings.html', form=form)

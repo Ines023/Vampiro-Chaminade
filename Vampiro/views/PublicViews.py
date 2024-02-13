@@ -11,14 +11,16 @@ from Vampiro.utils.forms import LoginForm, handle_form_errors, SignUpForm, Email
 from Vampiro.utils.emails import send_confirmation_instructions_email, send_welcome_email, send_password_reset_instructions_email, send_password_changed_email
 from Vampiro.services.users import add_user, confirm_user, update_password
 from Vampiro.utils.security import handle_exceptions, verify_confirmation_token, verify_reset_token
+from Vampiro.services.settings import get_game_status
 
 public = Blueprint('public', __name__)
+
+
 
 @public.route('/')
 @public.route('/home')
 @handle_exceptions
 def home():
-    print (User.query.first())
     return render_template('public/home.html')
 
 @public.route('/normas')

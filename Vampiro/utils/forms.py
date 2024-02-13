@@ -2,7 +2,7 @@
 
 from flask import flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo,  NumberRange
 
 from Vampiro.models.UserModel import User
@@ -114,3 +114,16 @@ class NewCronicaForm(FlaskForm):
     title = StringField('Título', validators=[DataRequired(), Length(min=1, max=80)])
     content = TextAreaField('Contenido', validators=[DataRequired(), Length(min=1, max=5000)])
     submit = SubmitField('Publicar')
+
+# ADMIN_FORM: INTERVENCIÓN EN DIPUTAS
+
+class DisputeInterventionForm(FlaskForm):
+    dispute_id = HiddenField()
+    response = SubmitField()
+
+# ADMIN_FORM: SETTINGS
+    
+class SettingsForm(FlaskForm):
+    game_mode = SelectField('Modo de Juego', choices=[('vampiro', 'Vampiro'), ('cupido', 'Cupido')], validators=[DataRequired()])
+    game_status = SelectField('Estado del Juego', choices=[('NOT_STARTED', 'Sin empezar'), ('OPEN_REGISTRY', 'Registro abierto'), ('IN_PROGRESS', 'Juego en proceso')], validators=[DataRequired()])
+    SubmitField = SubmitField('Guardar')

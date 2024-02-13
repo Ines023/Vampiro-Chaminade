@@ -1,3 +1,4 @@
+{% from "macros.html" import nav_bar %}
 <!DOCTYPE html>
 <html lang="es-ES">
 <head>
@@ -24,6 +25,7 @@
     {% endblock %}
 
     {% block navbar %}
+      {{ nav_bar(current_user, user_role, game_status) }}
     {% endblock %}
 
     {% block content %}

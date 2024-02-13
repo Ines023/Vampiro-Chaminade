@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from flask import Flask
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 
 from .database.mysql import db
 from config import Config
@@ -43,6 +43,15 @@ def create_app(config_class=Config, test_config=None):
     app.register_blueprint(public, url_prefix='/')
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(profile, url_prefix='/profile')
+
+    from Vampiro.services.settings import get_round_status, get_game_status
+    @app.context_processor
+    def inject_game_status_and_user_role():
+        game_status = get_game_status()
+        round_status = get_round_status()
+        user_role = current_user.role.name if current_user.is_authenticated else 'guest'
+        return dict(game_status=game_status.name, user_role=user_role, round_status=round_status)
+
 
     # DATABASE _________________________________________________________________
     db.init_app(app)

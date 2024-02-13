@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Registro de disputas
+{% endblock %}
+
+
+{% block content %}
+
+<section class="bg black-overlay">
+  <div class="container my-5 py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+
+        <div class="card bg-dark text-white" style="border-radius: 1rem;">
+          <div class="card-body p-3 text-center">
+
+            <div class="mb-md-5 mt-md-4 pb-3">
+
+              <h1>Disputas</h1>
+
+              <!-- Formulario de filtrado y ordenación -->
+              <form method="GET">
+                <input type="number" name="round" placeholder="Ronda">
+                <input type="number" name="hunt_id" placeholder="Caza">
+                <input type="number" name="hunter" placeholder="Cazador">
+                <input type="number" name="prey" placeholder="Presa">
+                <input type="date" name="date" placeholder="Fecha">
+                <select name="success">
+                  <option value="">Todas</option>
+                  <option value="true">Exitosas</option>
+                  <option value="false">No exitosas</option>
+                </select>
+                <select name="order_by">
+                  <option value="">Ordenar por</option>
+                  <option value="date">Fecha</option>
+                  <option value="round">Ronda</option>
+                  <option value="success">Éxito</option>
+                </select>
+                <button type="submit">Filtrar/Ordenar</button>
+              </form>
+            
+              <!-- Lista de cazas -->
+              {% if disputas.items|length == 0 %}
+                <p>No hay disputas</p>
+              {% endif %}
+              {% for disputa in disputas.items %}
+                <div>
+                  <h2>Disputa {{ disputa.id }}</h2>
+                  <p>Caza: {{ disputa.hunt_id }}</p>
+                  <p>Fecha: {{ disputa.date }}</p>
+                  <p>Habitación del cazador: {{ disputa.hunt.hunter_room }}</p>
+                  <p>Habitación de la presa: {{ disputa.hunt.prey_room }}</p>
+                  <p>Activa: {{ disputa.active }}</p>
+                  {% if disputa.active %}
+                  <form method="POST" action="{{ url_for('profile.admin_intervention') }}">
+                    {{ admin_intervention_form.csrf_token }}
+                    <input type="hidden" name="dispute_id" value="{{ disputa.id }}">
+                    <button type="submit" name="response" value="Hunter" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">Cazador gana</button>
+                    <button type="submit" name="response" value="Prey" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">Presa gana</button>
+                    </form>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            
+              <!-- Paginación -->
+              {% if disputas.has_prev %}
+                <a href="{{ url_for('disputas', page=hunts.prev_num) }}">Anterior</a>
+              {% endif %}
+              {% if disputas.has_next %}
+                <a href="{{ url_for('disputas', page=hunts.next_num) }}">Siguiente</a>
+              {% endif %}
+              <p>Total disputas: {{ disputas.total }}</p>
+              
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}

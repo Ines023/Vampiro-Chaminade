@@ -1,10 +1,14 @@
-{% extends "/public/layout_public.html" %}
+{% extends "layout.html" %}
+{% from "macros.html" import flash_messages %}
 
 {% block title %}El Vampiro{% endblock %}
 
 {% block header %}{% endblock %}
 
-{% block navbar %}{{ super() }}{% endblock %}
+{% block navbar %}
+{{ super() }}
+<div class="navbar-spacer"></div>
+{% endblock %}
 
 {% block content %}
 
@@ -12,7 +16,7 @@
 
         <div class="d-flex justify-content-center align-items-center h-100">
 
-            <div class="text-white text-center  w-75">
+            <div class="text-white text-center  w-75 ">
                 <div class="position-relative">
                     <img src="{{ url_for('static', filename='img/logo_vampiro.png') }}" class="d-inline-block align-top mw-100" alt="Logo del Vampiro">
                     <div style="position: absolute; right: 2%; bottom: 1%"> <h2 class="pixel-text" style="font-size: 2.3vw; color: #c9b4b4">AULA DE JUEGOS CHAMINADE</h2></div>
@@ -21,19 +25,7 @@
                 <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('public.cronicas')}}">CRÓNICAS</a>
                 <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('public.normas')}}">NORMAS</a>
                 
-                <!-- Flash messages -->
-
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> 
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
+                {{ flash_messages() }}
             
             </div>
 

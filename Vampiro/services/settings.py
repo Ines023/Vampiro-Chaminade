@@ -11,6 +11,14 @@ def get_settings():
     """
     return Settings.query.first()
 
+def get_mode():
+    """
+    Returns the game mode: VAMPIRO, CUPIDO
+    """
+    settings = get_settings()
+    mode = settings.mode
+    return mode
+
 def get_game_status():
     """
     Returns the game status: NOT_STARTED, REGISTRY_OPEN, IN_PROGRESS, FINISHED
@@ -36,6 +44,7 @@ def get_extension_status():
     return extension_status
 
 # SETTINGS SETTERS _________________________________________________________________________
+
 
 def set_mode(mode):
     """

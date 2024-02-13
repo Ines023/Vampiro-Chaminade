@@ -34,12 +34,6 @@ def check_game_status_and_role():
         if request.endpoint == 'profile.role_selector':
             return redirect(url_for('profile.my_stats'))
 
-@profile.context_processor
-def inject_game_status_and_user_role():
-    game_status = get_game_status()
-    round_status = get_round_status()
-    user_role = current_user.role.name
-    return dict(game_status=game_status, user_role=user_role, round_status=round_status)
 
 
 # PROFILE ______________________________________________________________________________________
