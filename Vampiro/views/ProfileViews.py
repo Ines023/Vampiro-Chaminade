@@ -17,11 +17,13 @@ from Vampiro.utils.security import handle_exceptions
 profile = Blueprint('profile', __name__)
 
 @profile.before_request
-@login_required
 def check_game_status_and_role():
     """
     Redirects the user to the appropriate page based on the game status and the user's role.    
     """
+    if not current_user.is_authenticated:
+        return redirect(url_for('public.login'))
+
     game_status = get_game_status()
     role = current_user.role
 
@@ -46,7 +48,7 @@ def role_selector():
     organizer_form = OrganizerForm()
 
     if role_selector_form.validate_on_submit() and role_selector_form.form_name.data == 'role_selector_form':
-        role = role_selector_form.role.data
+        role = role_selector_form.response.data
         if role == 'visitor':
             role_id = 3
         elif role == 'player':
@@ -69,7 +71,7 @@ def role_selector():
     else:
         handle_form_errors(organizer_form)
         
-    return render_template('profile/role_selector.html', form = role_selector_form, organizer_form = organizer_form)
+    return render_template('profile/role_selector.html', role_selector_form = role_selector_form, organizer_form = organizer_form)
 
 # GAME ______________________________________________________________________________________
 
@@ -77,28 +79,49 @@ def role_selector():
 @handle_exceptions
 def my_stats():
 
-    # Form setup
-    death_accusation_form = DeathAccusationForm()
-    duel_response_form_hunter = DuelResponseForm()
-    duel_response_form_prey = DuelResponseForm()
+    if current_user.player.alive == False:
+        duel_response_form_hunter = DuelResponseForm()
+        player = current_user.player
 
-    # Passing data to template
-    player = current_user.player
-    hunter = get_current_danger(player.id).hunter.user
-    prey = get_current_hunt(player.id).prey.user
-    ronda = get_round_number()
-    kills = {
-        'round': get_number_round_kills(ronda, player.id),
-        'total': get_number_total_kills(player.id)
-    }
-    disputes = {
-        'death_accusation_where_prey': get_death_accusation(player.id),
-        'death_accusation_where_hunter': get_death_accusation(prey.id),
-        'duel_where_hunter': get_duel_where_hunter(player.id),
-        'duel_where_prey': get_duel_where_prey(player.id)
-    }
+        last_prey = get_current_hunt(player.id).prey.user
+        ronda = get_round_number()
+        total_kills = get_number_total_kills(player.id)
+        pending_disputes = {
+            'death_accusation': get_death_accusation(last_prey.id),
+            'duel': get_duel_where_hunter(player.id),
+        }
 
-    return render_template('profile/my_stats.html',death_accusation_form=death_accusation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, kills=kills, disputes=disputes)
+        return render_template('profile/my_stats_dead.html', duel_response_form_hunter=duel_response_form_hunter, player=player, last_prey=last_prey, ronda=ronda, total_kills=total_kills, pending_disputes=pending_disputes)
+
+    else:
+        # Form setup
+        death_accusation_form = DeathAccusationForm()
+        death_confirmation_form = DeathConfirmationForm()
+        duel_response_form_hunter = DuelResponseForm()
+        duel_response_form_prey = DuelResponseForm()
+
+        # Passing data to template
+        player = current_user.player
+        hunter = get_current_danger(player.id).hunter.user
+        prey = get_current_hunt(player.id).prey.user
+
+        if get_death_accusation(player.id) is None  and get_duel_where_prey(player.id) is None:
+            on_hold = False
+        else:
+            on_hold = True
+        ronda = get_round_number()
+        kills = {
+            'round': get_number_round_kills(ronda, player.id),
+            'total': get_number_total_kills(player.id)
+        }
+        disputes = {
+            'death_accusation_where_prey': get_death_accusation(player.id),
+            'death_accusation_where_hunter': get_death_accusation(prey.id),
+            'duel_where_hunter': get_duel_where_hunter(player.id),
+            'duel_where_prey': get_duel_where_prey(player.id)
+        }
+
+        return render_template('profile/my_stats.html',death_accusation_form=death_accusation_form, death_confirmation_form=death_confirmation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, on_hold=on_hold, kills=kills, disputes=disputes)
 
 @profile.route('/my_stats/death_accusation', methods=['POST'])
 @handle_exceptions
@@ -125,24 +148,33 @@ def death_confirmation():
     """
 
 
-    form = DeathConfirmationForm
+    form = DeathConfirmationForm()
     player = current_user.player
+    
+    if form.confirmar.data:
+        response = True
+    elif form.desmentir.data:
+        response = False
+
+
 
     if form.validate_on_submit():
 
-        set_prey_initial_response(player.id, form.response.data)
+        set_prey_initial_response(player.id, response)
         dispute = get_current_dispute_by_prey(player.id)
 
-        if form.response.data == True:
+        if response == True:
             hunter_wins(dispute)
             hunter = dispute.hunt.hunter
             dead_victim = dispute.hunt.prey
             next_victim = get_current_hunt(hunter.id).prey
             send_hunt_success_email(hunter, next_victim)
             send_victim_death_email(dead_victim)
-        else:
+        elif response == False:
             dispute.set_revision_group()
-            send_duel_started_email(dispute.hunter, dispute.revision_group)
+            send_duel_started_email(dispute.hunt.hunter, dispute.revision_group)
+    
+    return redirect(url_for('profile.my_stats'))
     
 @profile.route('/my_stats/duel_response', methods=['POST'])
 @handle_exceptions
@@ -156,7 +188,10 @@ def duel_response():
 
     if form.validate_on_submit():
         type = form.type.data
-        response = form.response.data
+        if form.confirmar.data:
+            response = True
+        elif form.desmentir.data:
+            response = False
         player = current_user.player
 
         if type == 'hunter':

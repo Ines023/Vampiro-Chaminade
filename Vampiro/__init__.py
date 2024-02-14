@@ -33,6 +33,8 @@ def create_app(config_class=Config, test_config=None):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
+    login_manager.login_view = 'public.login'
 
     # BLUEPRINTS _______________________________________________________________
 

@@ -6,8 +6,9 @@ from sqlalchemy import func
 
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import Hunt, Player, Dispute
-from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_round_status
-from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
+from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_game_status, set_round_status
+from Vampiro.services.users import get_user_by_role
+from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_hunt_available_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
 
 
 # INDEX
@@ -111,8 +112,9 @@ def get_current_danger(prey_room):
     """
     Returns the current hunt object of a given prey id
     """
+    print(prey_room)
     current_round = get_round_number()
-    current_danger = Hunt.query.filter_by(round=current_round, room_prey=prey_room, success=False).first()
+    current_danger = Hunt.query.join(Player, Player.id == Hunt.room_hunter).filter(Hunt.round == current_round, Hunt.room_prey == prey_room, Hunt.success == False, Player.alive == True).first()
     return current_danger
 
 # HUNT SETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -130,16 +132,19 @@ def hunter_wins(dispute):
     """
     Kills the victim, marks the hunt as a success, deactivates the dispute, starts a new hunt.
     """
-    
     killer = dispute.hunt.hunter
     victim = dispute.hunt.prey
 
-    new_pair = (killer.room, get_current_hunt(victim).room_prey)
+    if killer.alive == False:
+        new_killer = get_current_danger(victim.room).room_hunter
+        new_pair = (new_killer, get_current_hunt(victim.room).room_prey)
+    else:
+        new_pair = (killer.room, get_current_hunt(victim.room).room_prey)
     kill(victim)
     hunt_success(dispute.hunt)
     deactivate_dispute(dispute)
 
-    if get_alive_players().length <= 1:
+    if len(get_alive_players()) <= 1:
         game_over()
     else:
         new_hunt(new_pair, get_round_number())
@@ -236,9 +241,12 @@ def get_death_accusation(room_prey):
     Returns the active death accusation where the player is the prey
     """
     dispute = get_current_dispute_by_prey(room_prey)
-
-    if dispute.death_accusation == True:
-        return dispute
+    
+    if dispute:
+        if dispute.death_accusation == True:
+            return dispute
+        else:
+            return None
     else:
         return None
 
@@ -248,8 +256,11 @@ def get_duel_where_hunter(room_hunter):
     """
     dispute = get_current_dispute_by_hunter(room_hunter)
 
-    if dispute.duel == True:
-        return dispute
+    if dispute:
+        if dispute.duel == True:
+            return dispute
+        else:
+            return None
     else:
         return None
 
@@ -259,8 +270,11 @@ def get_duel_where_prey(room_prey):
     """
     dispute = get_current_dispute_by_prey(room_prey)
 
-    if dispute.duel == True:
-        return dispute
+    if dispute:
+        if dispute.duel == True:
+            return dispute
+        else:
+            return None
     else:
         return None
 
@@ -355,6 +369,11 @@ def finalise_duel(dispute):
         send_duel_hunter_loss_email(killer)
         send_duel_prey_win_email(victim)
 
+    if killer.alive == False:
+        new_killer = get_current_danger(victim.room).room_hunter
+        send_hunt_available_email(new_killer)
+
+    
     deactivate_dispute(dispute)
 
 
@@ -539,7 +558,7 @@ def deaths_from_starvation():
     jugadores_vivos = get_alive_players()
     extension_status = get_extension_status()
 
-    if unsuccessful_players.length == jugadores_vivos.length and extension_status == 'NOT_EXTENDED':
+    if len(unsuccessful_players) == len(jugadores_vivos) and extension_status == 'NOT_EXTENDED':
         for player in unsuccessful_players:
             send_deadline_extension_email(player)
         set_extension_status('EXTENDED')
@@ -563,7 +582,7 @@ def generate_pairs():
 
 def new_round():
     """
-    Generates new pairs, updates the hunt table with the new round number and pairs
+    Generates new pairs, updates the hunt table with the new round number and pairs, and sends the new round email to the hunters.
     """
     new_round_number = get_round_number() + 1
     
@@ -588,6 +607,10 @@ def process_round():
         deaths_from_starvation()
 
         set_round_status('PROCESSED')
+
+        if get_alive_players() == None:
+            game_over()
+
         new_round()
 
     else:
@@ -626,8 +649,11 @@ def revision_period_done():
 # GAME START _________________________________________________________________________
     
 def start_game():
-    # Creates Player objects for all users with the player role
-    # Creates the first round of hunts
+    
+    users = get_user_by_role('player')
+    for user in users:
+        new_player(user.id)
+    new_round()
     # Starts temporalisation
     pass
 
@@ -641,7 +667,7 @@ def game_over():
 
     jugadores_vivos = get_alive_players()
 
-    if jugadores_vivos.length == 1:
+    if len(jugadores_vivos) == 1:
         ganador = jugadores_vivos[0]
     else:
         ganador = None
@@ -650,4 +676,5 @@ def game_over():
     players = Player.query.all()
     for player in players:
         send_game_finished_email(player, ganador=ganador)
-    pass
+
+    set_game_status('FINISHED')

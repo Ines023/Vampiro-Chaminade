@@ -22,19 +22,21 @@
 
                 {% if game_status == "REGISTRY_OPEN" %}
 
-                    {% if user_role == "visitante" %}
+                    {% if user_role == "visitor" %}
                     <p class="m-2 p-3 h4 pixel-text">Estamos preparando una partida. ¿Quieres jugar?</p>
                     <form method="POST" action="{{ url_for('profile.role_selector') }}">
                         {{ role_selector_form.csrf_token }}
                         {{ role_selector_form.form_name }}
-                        <button type="submit" name="response" value="player" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">¡Me muero de ganas!</button>
+                        <input type="hidden" name="response" value="player">
+                        <button type="submit" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">¡Me muero de ganas!</button>
                     </form>
                     {% elif user_role == "player" %}
                     <p class="m-2 p-3 h4 pixel-text">Lo tenemos apuntado, quieres jugar. ¡Te avisaremos pronto!</p>
                     <form method="POST" action="{{ url_for('profile.role_selector') }}">
                         {{ role_selector_form.csrf_token }}
                         {{ role_selector_form.form_name }}
-                        <button type="submit" name="response" value="visitor" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">Mejor no...</button>
+                        <input type="hidden" name="response" value="visitor">
+                        <button type="submit" class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text" style="font-size: max(1.2vw, 16px)">Mejor no...</button>
                     </form>
                     {% endif %}
 

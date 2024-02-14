@@ -2,7 +2,7 @@
 
 from flask import flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField, SelectField
+from wtforms import RadioField, StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField, SelectField, widgets
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo,  NumberRange
 
 from Vampiro.models.UserModel import User
@@ -86,6 +86,7 @@ class NewPasswordForm(FlaskForm):
 class RoleSelectorForm(FlaskForm):
     role = StringField('Rol')
     form_name = HiddenField(default='role_selector_form')
+    response = HiddenField()
 
 # FORM: IDENTIFICARSE COMO ORGANIZADOR
     
@@ -100,10 +101,13 @@ class DeathAccusationForm(FlaskForm):
     response = SubmitField()
 
 class DeathConfirmationForm(FlaskForm):
-    response = SubmitField()
+    confirmar = SubmitField('Confirmar')
+    desmentir = SubmitField('Desmentir')
 
 class DuelResponseForm(FlaskForm):
     type = HiddenField()
+    confirmar = SubmitField('SÍ')
+    desmentir = SubmitField('NO')
 
 
 
@@ -119,11 +123,12 @@ class NewCronicaForm(FlaskForm):
 
 class DisputeInterventionForm(FlaskForm):
     dispute_id = HiddenField()
-    response = SubmitField()
+    presa = SubmitField('Cazador gana')
+    cazador = SubmitField('Presa gana')
 
 # ADMIN_FORM: SETTINGS
     
 class SettingsForm(FlaskForm):
     game_mode = SelectField('Modo de Juego', choices=[('vampiro', 'Vampiro'), ('cupido', 'Cupido')], validators=[DataRequired()])
-    game_status = SelectField('Estado del Juego', choices=[('NOT_STARTED', 'Sin empezar'), ('OPEN_REGISTRY', 'Registro abierto'), ('IN_PROGRESS', 'Juego en proceso')], validators=[DataRequired()])
+    game_status = SelectField('Estado del Juego', choices=[('NOT_STARTED', 'Sin empezar'), ('REGISTRY_OPEN', 'Registro abierto'), ('IN_PROGRESS', 'Juego en proceso')], validators=[DataRequired()])
     SubmitField = SubmitField('Guardar')

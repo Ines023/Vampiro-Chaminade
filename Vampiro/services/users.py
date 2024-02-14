@@ -33,6 +33,15 @@ def confirm_user(user):
     db.session.commit()
 
 
+# USER GETTERS _______________________________________________________________________
+
+def get_user_by_role(role_name):
+    """
+    Returns a list of users with a specific role
+    """
+    users= User.query.join(Role).filter(Role.name == role_name).all()
+    return users
+
 # ROLE MANAGEMENT _______________________________________________________________________
 
 def role_to_dict(role):

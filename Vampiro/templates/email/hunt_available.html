@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Ya se ha cerrado todo.<br>Tus instintos más primarios te llaman, no es momento de esperas. <br> Ha llegad la hora de cazar.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Para más información sobre el juego revisa tu perfil en la web.</p>
+{% endblock %}

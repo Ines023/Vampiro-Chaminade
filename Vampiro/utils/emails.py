@@ -11,8 +11,9 @@ def send_email(subject, message, recipient):
     """
 
     print(f"Subject: {subject}")
-    print(f"Template: {message}")
     print(f"Recipient: {recipient}")
+    print(f"Template: {message}")
+
 
     # message = render_template(template, **kwargs)
 
@@ -164,7 +165,7 @@ def send_death_accusation_email(player, revision_group):
         hora = '11:00'
 
     subject = "¿Aquí termina todo?¿En serio?"
-    message = render_template('email/deadline_extension.html', player=player, hora=hora)
+    message = render_template('email/death_accusation.html', player=player, hora=hora)
     recipient = player.user.email
 
     send_email(subject, message, recipient)
@@ -236,6 +237,13 @@ def send_duel_prey_loss_email(player):
 
     send_email(subject, message, recipient)
 
+def send_hunt_available_email(player):
+
+    subject = "Tu presa te espera"
+    message = render_template('email/hunt_available.html', player=player)
+    recipient = player.user.email
+
+    send_email(subject, message, recipient)
 
 
 
