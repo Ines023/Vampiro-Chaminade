@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/beso.gif') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ hunter.user.name }}<br>Tienes una mancha justo... no, más a la derecha... ahí, sí, ahí.<br>Menudo festín te has pegado.<br>Pero justo cuando parecías saciado ha pasado {{prey.user.name}} de la {{prey.user.room}} y ya no dejas de pensar en tu nuevo objetivo.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Ya te has salvado por esta semana, pero nunca está mal tomar un aperitivo de más para pasar el rato.</p>
+{% endblock %}

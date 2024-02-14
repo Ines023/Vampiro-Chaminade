@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Desde esta noche, acecharás por siempre desde la penumbra. Ha llegado tu trágico final, vagar etérnamente como espíritu compungido.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Has muerto por asesinato, aquí termina tu partida.<br>¡Gracias por jugar!</p>
+{% endblock %}

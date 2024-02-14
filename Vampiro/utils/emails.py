@@ -1,5 +1,6 @@
 # /Vampiro/utils/emails.py
 
+from urllib.parse import quote_plus
 from flask import render_template
 
 # EMAIL SENDING THROUGH AZURE TOOL _____________________________________________________
@@ -10,8 +11,9 @@ def send_email(subject, message, recipient):
     """
 
     print(f"Subject: {subject}")
-    print(f"Template: {message}")
     print(f"Recipient: {recipient}")
+    print(f"Template: {message}")
+
 
     # message = render_template(template, **kwargs)
 
@@ -36,54 +38,86 @@ def send_email(subject, message, recipient):
 # USER EMAILS _________________________________________________________________________
     
 def send_confirmation_instructions_email(user):
-    
+    """
+    Sends an email to the user with a confirmation link that includes a timed token based on them.
+    """
+
+
     token = user.get_confirmation_token()
+    url_encoded_token = quote_plus(token)
 
     subject = "Confirma tu cuenta"
-    message = render_template('emails/confirmation_instructions.html', user=user, token=token)
+    message = render_template('email/confirmacion_instrucciones.html', user=user, token=url_encoded_token)
     recipient = user.email
 
     send_email(subject, message, recipient)   
 
 def send_welcome_email(user):
-    
+    """
+    Sends a welcome email to a just confirmed user.
+    """
+
+
     subject = "Una mordidita... de bienvenida"
-    message = render_template('emails/welcome.html', user=user)
+    message = render_template('email/welcome.html', user=user)
     recipient = user.email
 
     send_email(subject, message, recipient)
 
 def send_password_reset_instructions_email(user):
-    
+    """
+    Sends an email to the user with a link to reset their password that includes a token based on them.
+    """
+
+
     token = user.get_reset_password_token()
+    url_encoded_token = quote_plus(token)
 
     subject = "Cambia tu contraseña"
-    message = render_template('emails/reset_password_instructions.html', user=user, token=token)
+    message = render_template('email/contraseña_reset_instrucciones.html', user=user, token=url_encoded_token)
     recipient = user.email
 
     send_email(subject, message, recipient) 
 
 def send_password_changed_email(user):
-    
+    """
+    Sends an email to the user to confirm that their password has been changed.
+    """
+
     subject = "Tu contraseña ha sido cambiada"
-    message = render_template('emails/password_changed.html', user=user)
+    message = render_template('email/contraseña_reset_completada.html', user=user)
     recipient = user.email
 
     send_email(subject, message, recipient)
 
 def send_game_starting_soon_email(user):
-    
+    """
+    Sends an email to the user to inform them that the game is about to start.
+    """
+
     subject = "Se acerca la maldición"
-    message = render_template('emails/game_starting_soon.html', user=user)
+    message = render_template('email/game_starting_soon.html', user=user)
     recipient = user.email
 
     send_email(subject, message, recipient)
 
-def send_game_finished_email(user):
+def send_game_finished_email(player, ganador=None):
+    """
+    Sends an email to the user to inform them that the game has finished with the results.
+    """
     
-    subject = "Y sólo quedó uno en pie..."
-    message = render_template('emails/game_finished.html', user=user)
-    recipient = user.email
+    if ganador:
+        if player == ganador:
+            subject = "Y el último en pie... ¡Eres tú!"
+            message = render_template('email/game_finished_you_won.html', user=player.user)
+        else:
+            subject = "Y sólo quedó uno en pie..."
+            message = render_template('email/game_finished_yeswinner.html', user=player.user)
+    else:
+        subject = "Todo fue inundado por silencio..."
+        message = render_template('email/game_finished_nowinner.html', user=player.user)
+    
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -92,60 +126,80 @@ def send_game_finished_email(user):
 
 #   ROUND BEGIN/END
     
-def send_new_round_hunt_email(player):
-
+def send_new_round_hunt_email(player,prey):
+    """
+    Sends an email to the player to inform them that a new round has started.
+    """
     subject = "Empieza una nueva noche"
-    message = render_template('emails/new_round.html', player=player)
-    recipient = player.email
+    message = render_template('email/new_round.html', player=player, prey=prey)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 def send_starvation_email(player):
         
     subject = "Muerto... de hambre"
-    message = render_template('emails/starvation.html', player=player)
-    recipient = player.email
+    message = render_template('email/starvation.html', player=player)
+    recipient = player.user.email
+
+    send_email(subject, message, recipient)
+
+def send_deadline_extension_email(player):
+    """
+    Sends an email to the player to inform them that the deadline has been extended.
+    """
+    subject = "Te doy una noche más"
+    message = render_template('email/deadline_extension.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 
-
-
 #   DISPUTE: START
     
-def send_death_accusation_email(user):
+def send_death_accusation_email(player, revision_group):
+
+    if revision_group == 'DAY':
+        hora = '23:00'
+    else:
+        hora = '11:00'
 
     subject = "¿Aquí termina todo?¿En serio?"
-    message = render_template('emails/death_accusation.html', user=user)
-    recipient = user.email
+    message = render_template('email/death_accusation.html', player=player, hora=hora)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 #   HUNT: COMPLETION
 
-def send_hunt_success_email(player):
+def send_hunt_success_email(hunter, prey):
 
     subject = "Tu sed de sangre no tiene final"
-    message = render_template('emails/hunt_success.html', player=player)
-    recipient = player.email
+    message = render_template('email/hunt_success.html', hunter=hunter, prey=prey)
+    recipient = hunter.user.email
 
     send_email(subject, message, recipient)
 
 def send_victim_death_email(player):
 
     subject = "Adiós, mundo cruel"
-    message = render_template('emails/victim_death.html', player=player)
-    recipient = player.email
+    message = render_template('email/victim_death.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 #   DISPUTE: DUEL START
 
-def send_duel_started_email(player):
+def send_duel_started_email(player, revision_group):
+
+    if revision_group == 'DAY':
+        hora = '23:00'
+    else:
+        hora = '11:00'
 
     subject = "Tienes un duelo esta noche"
-    message = render_template('emails/duel_started.html', player=player)
-    recipient = player.email
+    message = render_template('email/duel_started.html', player=player, hora=hora)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
@@ -154,35 +208,42 @@ def send_duel_started_email(player):
 def send_duel_hunter_win_email(player):
 
     subject = "Victoria a medianoche"
-    message = render_template('emails/duel_hunter_win.html', player=player)
-    recipient = player.email
+    message = render_template('email/duel_hunter_win.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
     
 def send_duel_prey_win_email(player):
 
     subject = "Victoria a medianoche"
-    message = render_template('emails/duel_prey_win.html', player=player)
-    recipient = player.email
+    message = render_template('email/duel_prey_win.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 def send_duel_hunter_loss_email(player):
 
-    subject = "A las 00:00 pasaste a mejor vida"
-    message = render_template('emails/duel_hunter_loss.html', player=player)
-    recipient = player.email
+    subject = "A medianoche pasaste a mejor vida"
+    message = render_template('email/duel_hunter_loss.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
 def send_duel_prey_loss_email(player):
 
-    subject = "A las 00:00 pasaste a mejor vida"
-    message = render_template('emails/duel_prey_loss.html', player=player)
-    recipient = player.email
+    subject = "A medianoche pasaste a mejor vida"
+    message = render_template('email/duel_prey_loss.html', player=player)
+    recipient = player.user.email
 
     send_email(subject, message, recipient)
 
+def send_hunt_available_email(player):
+
+    subject = "Tu presa te espera"
+    message = render_template('email/hunt_available.html', player=player)
+    recipient = player.user.email
+
+    send_email(subject, message, recipient)
 
 
 

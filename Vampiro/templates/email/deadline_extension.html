@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Cada vez te rugen más las tripas. Hace días que no oyes un grito de agonía.<br>El ambiente es silencioso, inquietante...<br>La mera ilusión del sabor de la sangre en tus labios te da fuerzas para aguantar un poco más.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Casi mueres de inanición, pero esta última fuerza no durará mucho. Tienes una semana más para matar, o entonces no quedarán supervivientes.</p>
+{% endblock %}

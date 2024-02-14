@@ -1,4 +1,4 @@
-{% extends "/profile/layout_profile.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Partida actual{% endblock %}
 
@@ -21,7 +21,7 @@
                 <h1 class="m-2 p-3 pixel-text">GAME STATS</h1>
 
                 <p class="m-2 p-3 h4 pixel-text"> Vampiros vivos: {{ jugadores_vivos }} <br> Ronda actual: {{ ronda_actual }} <br> Muertos esta ronda: {{ muertos_ronda }} </p>
-                <p class="d-inline-block m-4 p-3 bg-danger text-white pixel-text" style="font-size: max(1.2vw, 12px)">Tiempo restante de ronda<br><br>___</p>
+                <p class="d-inline-block m-4 p-3 bg-danger text-white pixel-text" style="font-size: max(1.2vw, 12px)">La noche termina a las 00:00<br><br>Es posible que se postponga el inicio de la siguiente ronda 12 horas hasta que se resuelvan todas las disputas.</p>
 
                 
               </div>

@@ -1,0 +1,16 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>Y sobre las pilas de cuerpos se alzó una figura oscura, aún sedienta. Sería ingenuo llamar a tal locura una victoria.</p>
+{% endblock %}
+
+{% block action_button %}
+    <h2> {{ winner.name }} HA GANADO </h2>
+    <p>Si quieres saber más sobre el avance del juego, no olvides echar un ojo a las crónicas.</p>
+{% endblock %}

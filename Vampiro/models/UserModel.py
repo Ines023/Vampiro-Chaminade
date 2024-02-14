@@ -1,9 +1,13 @@
 # Vampiro/models/UserModel.py
-from Vampiro.database.mysql import db
+from datetime import datetime
+import time
 from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from authlib.jose import jwt
+from enum import Enum
+
+from Vampiro.database.mysql import db
 
 # APP USERS DATA _____________________________________________________________
 
@@ -17,7 +21,7 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-    role = db.relationship('Role', backref='users')
+    role = db.relationship('Role', backref='users', lazy='joined')
 
     player = db.relationship('Player', backref='user', uselist=False)
   
@@ -42,39 +46,22 @@ class User(db.Model, UserMixin):
         self.password_hashed = generate_password_hash(plaintext)
 
     def get_confirmation_token(self, expires_sec=1800):
-            s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
-            return s.dumps({'confirm_email': self.id}).decode('utf-8')
+        header = {"alg": "HS256"}
+        payload = {"exp": time.time() + expires_sec, "confirm_email": self.id}
+        private_key = current_app.config['SECRET_KEY']
+        return jwt.encode(header, payload, private_key)
 
     def get_reset_token(self, expires_sec=1800):
-        s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
-        return s.dumps({'reset_password': self.id}).decode('utf-8')
-    
-    @staticmethod
-    def verify_confirmation_token(token):
-        """
-        Returns the user if the token is valid, None otherwise
-        """
-        s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            user_id = s.loads(token)['confirm_email']
-        except:
-            return None
-        return User.query.get(user_id)
+        header = {"alg": "HS256"}
+        payload = {"exp": time.time() + expires_sec, "reset_password": self.id}
+        private_key = current_app.config['SECRET_KEY']
+        return jwt.encode(header, payload, private_key)
 
-    @staticmethod
-    def verify_reset_token(token):
-        """
-        Returns the user if the token is valid, None otherwise
-        """
-        s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            user_id = s.loads(token)['reset_password']
-        except:
-            return None
-        return User.query.get(user_id)
+    
 
 class Role(db.Model):
-    """ Posibles roles:
+    """
+    Posibles roles:
         - admin
         - player
         - visitor
@@ -111,6 +98,11 @@ class Hunt(db.Model):
     
     disputes = db.relationship('Dispute', backref='hunt')
 
+class Revision_Group(Enum):
+    DAY = 'DAY'
+    NIGHT = 'NIGHT'
+
+
 class Dispute(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     hunt_id = db.Column(db.Integer, db.ForeignKey('hunt.id'))
@@ -119,6 +111,14 @@ class Dispute(db.Model):
     hunter_duel_response = db.Column(db.Boolean)
     prey_duel_response = db.Column(db.Boolean)
     active = db.Column(db.Boolean, nullable=False)
+    revision_group = db.Column(db.Enum(Revision_Group), nullable=False)
+
+    def set_revision_group(self):
+        current_hour = datetime.now().hour
+        if 9 <= current_hour < 21:
+            self.revision_group = "DAY"
+        else:
+            self.revision_group = "NIGHT"
 
     @property
     def death_accusation(self):
@@ -154,5 +154,4 @@ class Dispute(db.Model):
         else:
             response = None
         return response
-
 

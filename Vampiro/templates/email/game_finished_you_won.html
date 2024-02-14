@@ -1,0 +1,20 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ user.name }}<br>Antes temido por todos, ahora no queda alma en pena para temblar ante tu presencia.<br><br>Notas como poco a poco vuelve tu juicio, la maldición se escurre más allá de tu cuerpo.<br><br>Ahora eres consciente de lo que has hecho... la masacre de la que eres responsable.<br><br>Surge en tu rostro un gesto ¿es dolor? ¿arrepentimiento?<br>O es acaso esa media sonrisa... orgullo. ¿Realmente fue la maldición, o parte de ti buscaba esto?</p>
+{% endblock %}
+
+{% block action_button %}
+    <h2> ENHORABUENA </h2>
+    <p>Has ganado esta edición del vampiro.</p>
+    <p>Y tu premio es... ¡La reputación de habértelo tomado tan en serio!</p>
+    <p id="anotacion">Tómatelo como quieras.</p>
+    <p>¡Gracias por jugar!</p>
+    <p id="anotacion">Un besito, nada mortal, del aula de juegos.</p>
+{% endblock %}

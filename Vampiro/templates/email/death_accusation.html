@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>¿Aquí acabará todo?<br>Tu cazador dice haberte matado, ¿es eso cierto?</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Tienes hasta las {{ hora }} para confirmar/discrepar, si no, el cazador ganará automáticamente. De ahí no hay vuelta atrás.</p>
+{% endblock %}

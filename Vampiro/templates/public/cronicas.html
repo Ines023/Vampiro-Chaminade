@@ -1,4 +1,4 @@
-{% extends "/public/layout_public.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Crónicas{% endblock %}
 
@@ -41,6 +41,7 @@
                 {% for cronica in cronicas %}
                 <h1 class="pixel-text text-center" style="font-size: 50px;">{{ cronica.title }}</h1>
                 {{ cronica.content|safe }}  
+                <hr>
                 {% endfor %}
               </div>
 

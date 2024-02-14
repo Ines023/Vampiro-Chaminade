@@ -1,0 +1,16 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>La oscuridad invadió los pasillos del Chaminade.<br>Lo que una vez fueron bestias sedientas ahora vagan sus recovecos como espíritus sin guía ni destino.<br>Esta vez, la maldición ha ganado.</p>
+{% endblock %}
+
+{% block action_button %}
+    <h2> Nadie ha ganado </h2>
+    <p>En las últimas dos semanas no ha habido una sola muerte (flipa).<br>Inés escribió este correo en su momento con la esperanza de nunca mandarlo.<br>Una lástima, pero hay que ponerse más las pilas.</p>
+{% endblock %}

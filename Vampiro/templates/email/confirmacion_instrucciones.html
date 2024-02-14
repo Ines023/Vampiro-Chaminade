@@ -1,53 +1,24 @@
-{% extends "/security/email/layout_email.html" %}
+{% extends "/email/layout_email_compatible.html" %}
 
-{% block title %}{% endblock %}
-
-{% block header %}
-{{super()}}
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
 {% endblock %}
 
-{% block navbar %}{% endblock %}
 
-{% block content %}
-<section style="background-color: #130b15;">
-    <div class="container pb-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-12 col-m-8">
-            
-            <div style="position: relative;">
-                <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}" style="max-width: 40%; position: absolute; bottom: 0; right: 2%;" alt="Retrato de vampiro">
-            </div>
+{% block dialogue_text %}
+    <p>{{ user.name }}<br>Casi estás registrado. Una vez confirmes tu cuenta te podremos mandar avisos sobre partidas por si quieres unirte y actualizaciones del juego.<br>¡A cazar!</p>
+{% endblock %}
 
 
-            <div id="dialogo">
-                <div id="nombre">
-                    <p style="margin: 0;">Conde drácula</p>
-                </div>
+{% block action_button%}
+<p>Haz click en el botón para confirmar tu cuenta.</p>
 
-
-                <p>Hola {{ user.name }}<br>Ya casi has terminado de registrarte, solo necesitas confirmar tu cuenta.</p>
-
-
-            </div>
-
-
-            <div class="text-center">
-                <a class="btn btn-warning pixel-text m-4 px-5" style="font-size: max(2.5vw, 20px); max-width: 80%;" href="{{ url_for_security('confirm_email', token=token, _external=True) }}">ACTIVA TU CUENTA</a>
-                
-                <div class="pixel-text" style="color: #a7a7a7; font-size: 2vw;">
-                    <p>Te avisaremos cuando empiece el juego</p>
-                </div>
-            
-            </div>
-
-
-
-        </div>
-      </div>
+<a href="{{ url_for('public.confirm', token=token, _external=True) }}" style="text-decoration: none; color: white;">
+    <div class="button">
+        <p>¡Me rugen las tripas!</p>
     </div>
-</section>
-{% endblock %}
+</a>
 
-{% block footer %}
-{{super()}}
+<p id="anotacion">Si no has solicitado este correo puedes ignorarlo</p>
 {% endblock %}

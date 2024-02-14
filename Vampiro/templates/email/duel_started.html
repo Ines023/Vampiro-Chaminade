@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Cuando creías que estaba muerta, tu víctima se ha escurrido entre los bancos de la capilla.<br>¿Cómo lo sabes?<br>Porque ha dejado una carta escrita con su propia sangre en tu casillero.<br>El olor es inconfundible.<br>Esta noche se decidirá vuestro destino.</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Tu víctima ha respondido que NO la has matado. Tenéis hasta las {{ hora }} para dar vuestra respuesta definitiva sobre esta caza. Poneos de acuerdo o lo decidirá el azar.<br>Si alguien ha incumplido las normas NO CONTESTES, informa a los organizadores.</p>
+{% endblock %}

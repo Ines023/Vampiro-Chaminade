@@ -1,0 +1,15 @@
+{% extends "/email/layout_email_compatible.html" %}
+
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/normal.png') }}"
+    alt="Retrato de vampiro" class="image-style">
+{% endblock %}
+
+
+{% block dialogue_text %}
+    <p>{{ player.user.name }}<br>Ha caído el sol y comienza una nueva noche.<br>Como Edward de crepúsculo, solo puedes pensar en el olor de la sangre de uno de los colegiales.<br>Tus ojos están fijos en: {{prey.user.name}} <br> Habitación: {{prey.user.room}}</p>
+{% endblock %}
+
+{% block action_button %}
+    <p>Para más información sobre el juego revisa tu perfil en la web.</p>
+{% endblock %}

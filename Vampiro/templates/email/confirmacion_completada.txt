@@ -1,8 +1,0 @@
-{{ user.name }}
-
-Ya estás registrado y confirmado.
-Te acaba de caer una maldición encima, y de las malas malísimas.
-Pronto llegará la luna roja, con ella la sed, y con la sed... la sangre.
-
-Recuerda, sin piedad.
-Conde Drácula.

@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block title %}Mis stats{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block navbar %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<section class="bg black-overlay">
+    <div class="container.fluid my-5 py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+
+            <div class="col-11 col-md-8 col-lg-6 col-xl-5 m-2">
+                <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-2">
+
+                            <h1 class="fw-bold mb-2 text-uppercase">MI VIDA PASADA</h1>
+                            <p class="text-white-50 mb-5">Aquí puedes ver la información más relevante sobre tu partida.
+                            </p>
+                            <div>
+                                <h3 class="my-3">Asesinatos</h3>
+                                <p>Totales: {{ total_kills }}</p>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-11 col-md-8 col-lg-6 col-xl-5 m-2">
+                <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-2">
+
+                            <h1 class="fw-bold mb-2 text-uppercase">ASUNTOS PENDIENTES</h1>
+                            <p class="text-white-50 mb-5">¿Te quedaste a medias?<br>No descansarás hasta rendir cuentas.</p>
+
+                            {% if pending_disputes.death_accusation is not none %}
+                                <div>
+                                    <h3 class="my-3">Tú última víctima aún no ha respondido</h3>
+                                    <p>¿Surgirá un duelo? ¡Sería de lo más fantasmagórico</p>
+                                    <p>Tiene hasta las
+                                    {% if pending_disputes.death_accusation.revision_group == "DAY" %}
+                                        23:00
+                                    {% else %}
+                                        11:00
+                                    {% endif %}
+                                    para responder.</p>
+                                </div>
+                            {% endif %}
+
+
+                            {% if pending_disputes.duel is not none  %}
+                            <div>
+                                <h1 class="my-3">DUELO DE MEDIANOCHE</h1>
+
+                                <div>
+                                    <h2 class="my-3 text-danger pixel-text">{{ player.user.name }} ({{player.room}}) y {{last_prey.name}} ({{last_prey.room}})</h2>
+                                    <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
+                                        {% if pending_disputes.duel.revision_group == "DAY" %}
+                                            23:00
+                                        {% else %}
+                                            11:00
+                                        {% endif %}
+                                         para hablarlo.</p>
+                                    <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas? Contacta a uno de los organizadores.</div>
+                                    <p>Esta es vuestra última oportunidad.<br>Si no respondéis lo mismo a tiempo, el azar decidirá quién gana este duelo.</p>
+                                    
+                                    {% if pending_disputes.duel.hunter_duel_response is none %}
+                                        <h4>¿Llegaste a matar?</h4>
+                                        <form method="POST" action="{{ url_for('profile.duel_response') }}">
+                                            {{ duel_response_form_hunter.csrf_token }}
+                                            <input type="hidden" name="type" value="hunter">
+                                            {{ duel_response_form_hunter.confirmar(class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text", style="font-size: max(1.2vw, 16px)") }}
+                                            {{ duel_response_form_hunter.desmentir(class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text", style="font-size: max(1.2vw, 16px)") }}
+                                        </form>
+                                    {% else %}
+                                        <div class="alert alert-warning pixel-text h5" role="alert">
+                                            <p> Hemos guardado tu respuesta: <br>
+                                            {% if pending_disputes.duel.prey_duel_response == True %}
+                                                SÍ, MATÉ. <br>
+                                            {% else %}
+                                                NO MATÉ. <br>
+                                            {% endif %}
+                                            Estamos esperando la respuesta de {{ last_prey.name }}.</p>
+                                        </div>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if pending_disputes.death_accusation is none and pending_disputes.duel is none %}
+                                <div>
+                                    <h4 class="my-3">Ya no te quedan ataduras con este mundo.</h4>
+                                    <p>Solo te mantiene presente un profundo rencor.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% endblock %}

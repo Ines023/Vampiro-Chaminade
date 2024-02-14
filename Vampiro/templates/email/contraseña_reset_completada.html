@@ -1,44 +1,14 @@
-{% extends "/security/email/layout_email.html" %}
+{% extends "/email/layout_email_compatible.html" %}
 
-{% block title %}{% endblock %}
-
-{% block header %}
-{{super()}}
+{% block dialogue_avatar %}
+    <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}"
+    alt="Retrato de vampiro" class="image-style">
 {% endblock %}
 
-{% block navbar %}{% endblock %}
 
-{% block content %}
-<section style="background-color: #130b15;">
-    <div class="container pb-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-12 col-m-8">
-            
-            <div style="position: relative;">
-                <img src="{{ url_for('static', filename='img/vampiro/molesto.png') }}" style="max-width: 40%; position: absolute; bottom: 0; right: 2%;" alt="Retrato de vampiro">
-            </div>
-
-
-            <div id="dialogo">
-                <div id="nombre">
-                    <p style="margin: 0;">Conde drácula</p>
-                </div>
-
-
-                <p>{{ user.name }}<br>Ya he cambiado tu contraseña.<br>Que no se te olvide.</p>
-
-
-            </div>
-
-
-
-
-        </div>
-      </div>
-    </div>
-</section>
+{% block dialogue_text %}
+    <p>{{ user.name }}<br>Ya he cambiado tu contraseña.<br>Que no se te olvide.</p>
 {% endblock %}
 
-{% block footer %}
-{{super()}}
+{% block action_button %}
 {% endblock %}
