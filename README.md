@@ -1,3 +1,4 @@
 # Vampiro
  
-A flask web app to manage the Vampiro game 
+Una aplicación web para automatizar el juego del Vampiro en el CMU Chaminade.
+
