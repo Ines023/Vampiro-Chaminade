@@ -520,7 +520,7 @@ def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=No
 
 # TEMPORALISATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-# Routinary dispute management ---------------------------------- AT 11AM AND 11PM
+# Routinary dispute management ---------------------------------- 
 
 def death_accusation_revision(revision_group):
     acusaciones_pendientes = get_general_death_accusations(revision_group=revision_group)
@@ -632,7 +632,7 @@ def round_end():
     
     process_round()
 
-# SUNDAY 12:00
+# MONDAY 12:00
 
 def revision_period_done():
     """
@@ -654,7 +654,10 @@ def start_game():
     for user in users:
         new_player(user.id)
     new_round()
-    # Starts temporalisation
+
+    #start temporalisation
+
+
     pass
 
 
@@ -662,8 +665,9 @@ def start_game():
     
 def game_over():
     
-    # Stop dispute revisions
-    # Stop round processing
+    # Stop temporalisation
+
+    
 
     jugadores_vivos = get_alive_players()
 

@@ -78,9 +78,9 @@
                                     </form>
                                     <p>Tienes hasta las
                                     {% if disputes.death_accusation_where_prey.revision_group == "DAY" %}
-                                        23:00
+                                        00:00
                                     {% else %}
-                                        11:00
+                                        12:00
                                     {% endif %}
                                     para responder.</p>
                                 </div>
@@ -99,9 +99,9 @@
                                     <h2 class="my-3 text-danger pixel-text">{{ player.user.name }} ({{player.room}}) y {{prey.name}} ({{prey.room}})</h2>
                                     <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
                                         {% if disputes.duel_where_hunter.revision_group == "DAY" %}
-                                            23:00
+                                            00:00
                                         {% else %}
-                                            11:00
+                                            12:00
                                         {% endif %}
                                          para hablarlo.</p>
                                     <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas? Contacta a uno de los organizadores.</div>
@@ -139,9 +139,9 @@
                                     <h2 class="my-3 text-danger pixel-text">{{hunter.name}} ({{hunter.room}}) y {{ player.user.name }} ({{ player.room }})</h2>
                                     <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
                                         {% if disputes.duel_where_prey.revision_group == "DAY" %}
-                                            23:00
+                                            00:00
                                         {% else %}
-                                            11:00
+                                            12:00
                                         {% endif %}
                                          para hablarlo.</p>
                                     <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas?<br> NO CONTESTES AÚN. <br> Contacta a uno de los organizadores.</div>

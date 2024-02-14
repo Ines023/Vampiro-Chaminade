@@ -160,9 +160,9 @@ def send_deadline_extension_email(player):
 def send_death_accusation_email(player, revision_group):
 
     if revision_group == 'DAY':
-        hora = '23:00'
+        hora = '00:00'
     else:
-        hora = '11:00'
+        hora = '12:00'
 
     subject = "¿Aquí termina todo?¿En serio?"
     message = render_template('email/death_accusation.html', player=player, hora=hora)
@@ -193,9 +193,9 @@ def send_victim_death_email(player):
 def send_duel_started_email(player, revision_group):
 
     if revision_group == 'DAY':
-        hora = '23:00'
+        hora = '00:00'
     else:
-        hora = '11:00'
+        hora = '12:00'
 
     subject = "Tienes un duelo esta noche"
     message = render_template('email/duel_started.html', player=player, hora=hora)

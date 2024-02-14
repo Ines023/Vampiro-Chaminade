@@ -47,9 +47,9 @@
                                     <p>¿Surgirá un duelo? ¡Sería de lo más fantasmagórico</p>
                                     <p>Tiene hasta las
                                     {% if pending_disputes.death_accusation.revision_group == "DAY" %}
-                                        23:00
+                                        00:00
                                     {% else %}
-                                        11:00
+                                        12:00
                                     {% endif %}
                                     para responder.</p>
                                 </div>
@@ -64,9 +64,9 @@
                                     <h2 class="my-3 text-danger pixel-text">{{ player.user.name }} ({{player.room}}) y {{last_prey.name}} ({{last_prey.room}})</h2>
                                     <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
                                         {% if pending_disputes.duel.revision_group == "DAY" %}
-                                            23:00
+                                            00:00
                                         {% else %}
-                                            11:00
+                                            12:00
                                         {% endif %}
                                          para hablarlo.</p>
                                     <div class="alert alert-danger pixel-text h5" role="alert">¿Alguien se ha saltado las normas? Contacta a uno de los organizadores.</div>
