@@ -93,7 +93,7 @@ def dispute_intervention():
             response = 'Prey'
         elif form.cazador.data:
             response = 'Hunter'
-
+        print(response)
         dispute = get_dispute_by_id(dispute_id)
 
         admin_intervention(dispute, response)
@@ -154,8 +154,10 @@ def intervencion_divina(accion):
         round_end()
     elif accion == 'revision_period_done':
         revision_period_done()
-    elif accion == 'dispute_revision':
-        dispute_revision()
+    elif accion == 'dispute_revision_day':
+        dispute_revision('DAY')
+    elif accion == 'dispute_revision_night':
+        dispute_revision('NIGHT')
     else:
         pass
 

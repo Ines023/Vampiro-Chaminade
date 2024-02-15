@@ -20,7 +20,8 @@
 
                 <h1 class="m-2 p-3 pixel-text">SOLO SI LA TEMPORALIZACIÓN PETA</h1>
 
-                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('admin.intervencion_divina', accion='dispute_revision') }}">REVISAR DISPUTAS </a>
+                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('admin.intervencion_divina', accion='dispute_revision_day') }}">REVISAR DISPUTAS DÍA</a>
+                <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('admin.intervencion_divina', accion='dispute_revision_night') }}">REVISAR DISPUTAS NOCHE</a>
                 <hr>
                 <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('admin.intervencion_divina', accion='finalizar_ronda') }}">FIN DE RONDA</a>
                 <a class="d-inline-block m-4 px-5 btn-warning btn-lg pixel-text" style="font-size: max(1.2vw, 12px)" href="{{ url_for('admin.intervencion_divina', accion='revision_period_done') }}">FIN DEL PERIODO DE REVISION</a>

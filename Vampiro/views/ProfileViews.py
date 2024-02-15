@@ -61,7 +61,6 @@ def role_selector():
         if organizer_form.password.data == os.getenv('ADMIN_CODE'):
             #id for admin role, using names was giving issues
             admin=1
-            print(admin)
             change_role(current_user, admin)
 
             return redirect(url_for('admin.dashboard'))
@@ -105,10 +104,18 @@ def my_stats():
         hunter = get_current_danger(player.id).hunter.user
         prey = get_current_hunt(player.id).prey.user
 
-        if get_death_accusation(player.id) is None  and get_duel_where_prey(player.id) is None:
+
+        death_accusation = get_death_accusation(prey.id)
+        duel = get_duel_where_prey(prey.id)
+
+        if death_accusation is not None and death_accusation.hunt.hunter == player:
+            on_hold = False
+        elif duel is not None and duel.hunt.hunter == player:
             on_hold = False
         else:
-            on_hold = True
+            on_hold = death_accusation is not None or duel is not None
+
+
         ronda = get_round_number()
         kills = {
             'round': get_number_round_kills(ronda, player.id),
@@ -201,7 +208,8 @@ def duel_response():
             dispute = get_current_dispute_by_prey(player.id)
             set_prey_duel_response(dispute, response)
 
-        if reached_agreement(dispute):
+
+        if dispute.hunter_duel_response is not None and dispute.prey_duel_response is not None:
             finalise_duel(dispute)
 
     return redirect(url_for('profile.my_stats'))

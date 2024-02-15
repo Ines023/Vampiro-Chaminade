@@ -19,13 +19,13 @@
                         <div class="mb-md-5 mt-md-4 pb-2">
 
                             <h1 class="fw-bold mb-2 text-uppercase">MIS STATS</h1>
-                            <p class="text-white-50 mb-5">Aquí puedes ver la información más relevante sobre tu partida.
+                            <p class="text-white-50 mb-5">Bienvenido {{ player.user.name }} {{ player.id }} <br> Aquí puedes ver la información más relevante sobre tu partida.
                             </p>
 
                             <div>
                                 <h3 class="my-3">Tu presa actual</h3>
 
-                                {% if round_status == "PENDING" or round_status == "TO_BE_FINALISED" %}
+                                {% if round_status.value == "PENDING" or round_status.value == "TO_BE_FINALISED" %}
                                     <p>Actualmente estamos procesando la última ronda y no tienes una víctima asignada.</p>
                                 {% elif on_hold  %}
                                     <p>Tu víctima tiene asuntos pendientes con su cazador previo.<br>Espera a que se resuelvan para que puedas cazarla.</p>
@@ -34,6 +34,8 @@
                                     <p>Habitación: {{ prey.room }}</p>
                                     {% if disputes.duel_where_hunter is not none or disputes.death_accusation_where_hunter is not none %}
                                     <div class="alert alert-danger pixel-text h5" role="alert">Ya se ha iniciado una disputa.</div>                               
+                                    {% elif disputes.duel_where_prey is not none or disputes.death_accusation_where_prey is not none %}
+                                    <div class="alert alert-danger pixel-text h5" role="alert">Hasta que no se aclare si estás vivo no podrás matar.</div>
                                     {% else %}
                                     <form method="POST" action="{{ url_for('profile.death_accusation')}}">
                                         {{ death_accusation_form.csrf_token }}

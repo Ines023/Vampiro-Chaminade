@@ -90,7 +90,7 @@ class Player(db.Model):
 
 class Hunt(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     round = db.Column(db.Integer, nullable=False)
     room_hunter = db.Column(db.Integer, db.ForeignKey('player.id'))
     room_prey = db.Column(db.Integer, db.ForeignKey('player.id'))
@@ -106,7 +106,7 @@ class Revision_Group(Enum):
 class Dispute(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     hunt_id = db.Column(db.Integer, db.ForeignKey('hunt.id'))
-    date = db.Column(db.Date, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
     prey_response = db.Column(db.Boolean)
     hunter_duel_response = db.Column(db.Boolean)
     prey_duel_response = db.Column(db.Boolean)

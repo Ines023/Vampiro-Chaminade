@@ -2,10 +2,10 @@
 import random
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import and_, func
 
 from Vampiro.database.mysql import db
-from Vampiro.models.UserModel import Hunt, Player, Dispute
+from Vampiro.models.UserModel import Hunt, Player, Dispute, Revision_Group
 from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_game_status, set_round_status
 from Vampiro.services.users import get_user_by_role
 from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_hunt_available_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
@@ -92,7 +92,7 @@ def new_hunt(hunt_pair, round_number):
     """
     Creates a new hunt with the given pair of player ids and a round number
     """
-    date = datetime.now().date()
+    date = datetime.now()
     hunt = Hunt(date=date, round=round_number, room_hunter=hunt_pair[0], room_prey=hunt_pair[1], success=False)
     db.session.add(hunt)
     db.session.commit()
@@ -112,7 +112,6 @@ def get_current_danger(prey_room):
     """
     Returns the current hunt object of a given prey id
     """
-    print(prey_room)
     current_round = get_round_number()
     current_danger = Hunt.query.join(Player, Player.id == Hunt.room_hunter).filter(Hunt.round == current_round, Hunt.room_prey == prey_room, Hunt.success == False, Player.alive == True).first()
     return current_danger
@@ -165,7 +164,7 @@ def new_death_accusation(room_hunter):
     hunt = get_current_hunt(room_hunter)
 
     hunt_id = hunt.id
-    date = datetime.now().date()
+    date = datetime.now()
 
     dispute = Dispute(hunt_id=hunt_id, date=date, prey_response=None, hunter_duel_response=None, prey_duel_response=None, active=True)
     dispute.set_revision_group()
@@ -185,6 +184,7 @@ def get_general_disputes(revision_group=None):
     """
     Returns all the active disputes
     """
+    revision_group = Revision_Group[revision_group].value if revision_group else None
     if revision_group:
         disputes = Dispute.query.filter_by(active=True, revision_group=revision_group).all()
     else:
@@ -195,20 +195,22 @@ def get_general_death_accusations(revision_group=None):
     """
     Returns all the active death accusations
     """
+    revision_group = Revision_Group[revision_group].value if revision_group else None
     if revision_group:
-        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True, revision_group=revision_group).all()
+        death_accusations = Dispute.query.filter(Dispute.active==True, Dispute.prey_response==None, Dispute.revision_group==revision_group).all()
     else:
-        death_accusations = Dispute.query.filter_by(active=True, death_accusation=True).all()
+        death_accusations = Dispute.query.filter(Dispute.active==True, Dispute.prey_response==None).all()
     return death_accusations
 
 def get_general_duels(revision_group=None):
     """
     Returns all the active duels
     """
+    revision_group = Revision_Group[revision_group].value if revision_group else None
     if revision_group:
-        duels = Dispute.query.filter_by(active=True, duel=True, revision_group=revision_group).all()
+        duels = Dispute.query.filter(Dispute.active==True, Dispute.prey_response!=None, Dispute.prey_response!=True, Dispute.revision_group==revision_group).all()
     else:
-        duels = Dispute.query.filter_by(active=True, duel=True).all()
+        duels = Dispute.query.filter(Dispute.active==True, Dispute.prey_response!=None, Dispute.prey_response!=True).all()
     return duels
 
 #   PLAYER SPECIFIC disputes where a player has hunter/prey role
@@ -370,7 +372,7 @@ def finalise_duel(dispute):
         send_duel_prey_win_email(victim)
 
     if killer.alive == False:
-        new_killer = get_current_danger(victim.room).room_hunter
+        new_killer = get_current_danger(victim.room).hunter
         send_hunt_available_email(new_killer)
 
     
@@ -436,7 +438,8 @@ def get_unsuccessful_players(round_number):
     """
     unsuccessful_players = db.session.query(Player).filter(
         Player.hunt_where_hunter.any(Hunt.round == round_number),
-        ~Player.hunt_where_hunter.any(Hunt.round == round_number, Hunt.success == True)
+        ~Player.hunt_where_hunter.any(and_(Hunt.round == round_number, Hunt.success == True)),
+        Player.alive == True
     ).all()
 
     return unsuccessful_players
@@ -524,14 +527,12 @@ def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=No
 
 def death_accusation_revision(revision_group):
     acusaciones_pendientes = get_general_death_accusations(revision_group=revision_group)
-
     if acusaciones_pendientes:
         for acusacion in acusaciones_pendientes:
             hunter_wins(acusacion)
 
 def duel_revision(revision_group):
     duelos_pendientes = get_general_duels(revision_group=revision_group)
-
     if duelos_pendientes:
         for duelo in duelos_pendientes:
             finalise_duel(duelo)
@@ -544,6 +545,7 @@ def dispute_revision(revision_group):
     """
     death_accusation_revision(revision_group)
     duel_revision(revision_group)
+    print('dispute revision done')
 
 # Routinary round management ---------------------------------- AT 12AM AND 12PM
     
@@ -554,15 +556,22 @@ def deaths_from_starvation():
     This only happens once, controlled by the extension_status variable.
     """
     round_number = get_round_number()
+    print('round number:', round_number)
     unsuccessful_players = get_unsuccessful_players(round_number)
+    print('unsuccessful players:', unsuccessful_players)
     jugadores_vivos = get_alive_players()
+    print('jugadores vivos:', jugadores_vivos)
     extension_status = get_extension_status()
+    print('extension status:', extension_status)
 
-    if len(unsuccessful_players) == len(jugadores_vivos) and extension_status == 'NOT_EXTENDED':
+    if (len(unsuccessful_players) == len(jugadores_vivos)) and (extension_status.value == 'NOT_EXTENDED'):
+        print('inside extension')
         for player in unsuccessful_players:
             send_deadline_extension_email(player)
         set_extension_status('EXTENDED')
     else:  
+        print('inside anihilation by starvation')
+        print('unsuccessful players:', unsuccessful_players)
         for player in unsuccessful_players:
             kill(player)
             send_starvation_email(player)
@@ -602,18 +611,24 @@ def process_round():
     """
 
     round_status = get_round_status()
-    if round_status == 'TO_BE_FINALISED':
-
+    if round_status.value == 'TO_BE_FINALISED':
+        print('inside to be finalised')
         deaths_from_starvation()
-
+        print('deaths from starvation done')
         set_round_status('PROCESSED')
+        print ('round status set to processed') 
 
-        if get_alive_players() == None:
+        jugadores_restantes = get_alive_players()
+
+        if jugadores_restantes and len(jugadores_restantes) > 1:
+            print('new round')
+            new_round()
+        else:
+            print('game over')
             game_over()
 
-        new_round()
-
     else:
+        print('round was not due to be finalised')
         pass
 
 # SUNDAY 00:00
@@ -629,7 +644,6 @@ def round_end():
         set_round_status('PENDING')
     else:
         set_round_status('TO_BE_FINALISED')
-    
     process_round()
 
 # MONDAY 12:00
@@ -640,7 +654,7 @@ def revision_period_done():
     If not, it doesn't do anything.
     """
     round_status = get_round_status()
-    if round_status == 'PENDING':
+    if round_status.value == 'PENDING':
         set_round_status('TO_BE_FINALISED')
     
     process_round()
@@ -650,6 +664,9 @@ def revision_period_done():
     
 def start_game():
     
+    set_round_status('PROCESSED')
+    set_extension_status('NOT_EXTENDED')
+
     users = get_user_by_role('player')
     for user in users:
         new_player(user.id)

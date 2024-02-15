@@ -1,7 +1,8 @@
 # /Vampiro/utils/emails.py
 
 from urllib.parse import quote_plus
-from flask import render_template
+from flask import render_template, request
+import json
 
 # EMAIL SENDING THROUGH AZURE TOOL _____________________________________________________
 
@@ -10,30 +11,23 @@ def send_email(subject, message, recipient):
     Sends an email through Azure Logic Apps
     """
 
-    print(f"Subject: {subject}")
-    print(f"Recipient: {recipient}")
-    print(f"Template: {message}")
+    #   URL of the Logic App
+    url = "https://prod-27.francesouth.logic.azure.com:443/workflows/c30aec9fd78541e19c8cbbfbcb5107e1/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_YcSKY0B5ONCxTdTejSqtxKxGdDPPeblVFP7-lq2juA"
 
+    #   JSON payload
+    payload = {
+        "subject": subject,
+        "message": message,
+        "recipient": recipient
+    }
 
-    # message = render_template(template, **kwargs)
+    #   Send the HTTP request
+    headers = {'Content-Type': 'application/json'}
+    response = request.post(url, headers=headers, data=json.dumps(payload))
 
-    # URL of the Logic App
-    # url = "https://prod-27.francesouth.logic.azure.com:443/workflows/c30aec9fd78541e19c8cbbfbcb5107e1/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_YcSKY0B5ONCxTdTejSqtxKxGdDPPeblVFP7-lq2juA"
-
-    # JSON payload
-    # payload = {
-    #     "subject": subject,
-    #     "message": message,
-    #     "recipient": recipient
-    # }
-
-    # Send the HTTP request
-    # headers = {'Content-Type': 'application/json'}
-    # response = request.post(url, headers=headers, data=json.dumps(payload))
-
-    # Check the response
-    # if response.status_code != 200:
-    #     print(f"Failed to send email: {response.content}")
+    #   Check the response
+    if response.status_code != 200:
+        print(f"Failed to send email: {response.content}")
 
 # USER EMAILS _________________________________________________________________________
     
@@ -112,7 +106,7 @@ def send_game_finished_email(player, ganador=None):
             message = render_template('email/game_finished_you_won.html', user=player.user)
         else:
             subject = "Y sólo quedó uno en pie..."
-            message = render_template('email/game_finished_yeswinner.html', user=player.user)
+            message = render_template('email/game_finished_yeswinner.html', user=player.user, winner=ganador.user)
     else:
         subject = "Todo fue inundado por silencio..."
         message = render_template('email/game_finished_nowinner.html', user=player.user)

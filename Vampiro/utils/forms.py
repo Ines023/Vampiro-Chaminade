@@ -123,8 +123,8 @@ class NewCronicaForm(FlaskForm):
 
 class DisputeInterventionForm(FlaskForm):
     dispute_id = HiddenField()
-    presa = SubmitField('Cazador gana')
-    cazador = SubmitField('Presa gana')
+    presa = SubmitField('Presa gana')
+    cazador = SubmitField('Cazador gana')
 
 # ADMIN_FORM: SETTINGS
     
