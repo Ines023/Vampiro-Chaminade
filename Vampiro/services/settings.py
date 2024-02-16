@@ -43,6 +43,22 @@ def get_extension_status():
     extension_status = settings.extension_status
     return extension_status
 
+def get_timer_switch_value():
+    """
+    Returns the timer switch value: True, False
+    """
+    settings = get_settings()
+    timer_switch_value = settings.timer_switch
+    return timer_switch_value
+
+def get_holidays():
+    """
+    Returns the vacaciones value: True, False
+    """
+    settings = get_settings()
+    vacaciones = settings.holidays
+    return vacaciones
+
 # SETTINGS SETTERS _________________________________________________________________________
 
 
@@ -76,4 +92,20 @@ def set_extension_status(extension_status):
     """
     settings = get_settings()
     settings.extension_status = extension_status
+    db.session.commit()
+
+def set_timer_switch_value(value):
+    """
+    Changes the timer switch value: True, False
+    """
+    settings = get_settings()
+    settings.timer_switch = value
+    db.session.commit()
+
+def set_holidays(value):
+    """
+    Changes the vacaciones value: True, False
+    """
+    settings = get_settings()
+    settings.holidays = value
     db.session.commit()

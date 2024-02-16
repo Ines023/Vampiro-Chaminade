@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 
 from Vampiro.models.NewsletterModel import Cronicas
 from Vampiro.utils.forms import NewCronicaForm, DisputeInterventionForm, SettingsForm, handle_form_errors
-from Vampiro.services.admin_actions import add_cronica, avisar_a_usuarios
+from Vampiro.services.admin_actions import activate_automation, activate_holidays, add_cronica, avisar_a_usuarios, deactivate_automation, deactivate_holidays
 from Vampiro.utils.security import handle_exceptions
 from Vampiro.services.settings import get_game_status, get_mode, set_mode, set_game_status
 from Vampiro.services.game import admin_intervention, dispute_revision, get_alive_players, get_dispute_by_id, get_disputes_filtered, get_hunts_filtered, get_round_number, get_general_number_round_kills, revision_period_done, round_end, start_game
@@ -150,6 +150,7 @@ def settings():
 @admin.route('/intervencion_divina/<accion>')
 @handle_exceptions
 def intervencion_divina(accion):
+
     if accion == 'finalizar_ronda':
         round_end()
     elif accion == 'revision_period_done':
@@ -158,6 +159,14 @@ def intervencion_divina(accion):
         dispute_revision('DAY')
     elif accion == 'dispute_revision_night':
         dispute_revision('NIGHT')
+    elif accion == 'activate_automation':
+        activate_automation()
+    elif accion == 'deactivate_automation':
+        deactivate_automation()
+    elif accion == 'holidays':
+        activate_holidays()
+    elif accion == 'vuelta_al_cole':
+        deactivate_holidays()
     else:
         pass
 

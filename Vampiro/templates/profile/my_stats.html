@@ -29,6 +29,8 @@
                                     <p>Actualmente estamos procesando la última ronda y no tienes una víctima asignada.</p>
                                 {% elif on_hold  %}
                                     <p>Tu víctima tiene asuntos pendientes con su cazador previo.<br>Espera a que se resuelvan para que puedas cazarla.</p>
+                                {% elif holidays  %}
+                                    <p>Estamos de vacaciones... Vampiro incluido. Descansa un poco y guarda fuerzas para la vuelta.</p>
                                 {% else %}
                                     <p>Nombre: {{ prey.name }}</p>
                                     <p>Habitación: {{ prey.room }}</p>

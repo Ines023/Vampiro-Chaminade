@@ -29,5 +29,7 @@ class Settings(db.Model):
     game_status = db.Column(db.Enum(GameStatus), nullable=False)
     round_status = db.Column(db.Enum(RoundStatus), nullable=False)
     extension_status = db.Column(db.Enum(ExtensionStatus), nullable=False)
+    timer_switch = db.Column(db.Boolean, nullable=False)
+    holidays = db.Column(db.Boolean, nullable=False)
 
 

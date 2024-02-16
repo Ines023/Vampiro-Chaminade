@@ -660,6 +660,14 @@ def revision_period_done():
     process_round()
 
 
+# AZURE SETUP ________________________________________________________________
+
+from azure.mgmt.web import WebSiteManagementClient
+from azure.identity import DefaultAzureCredential
+
+
+
+
 # GAME START _________________________________________________________________________
     
 def start_game():
@@ -672,9 +680,6 @@ def start_game():
         new_player(user.id)
     new_round()
 
-    #start temporalisation
-
-
     pass
 
 
@@ -682,10 +687,6 @@ def start_game():
     
 def game_over():
     
-    # Stop temporalisation
-
-    
-
     jugadores_vivos = get_alive_players()
 
     if len(jugadores_vivos) == 1:

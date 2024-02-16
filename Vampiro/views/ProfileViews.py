@@ -10,7 +10,7 @@ from Vampiro.utils.emails import send_duel_started_email, send_hunt_success_emai
 from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, DuelResponseForm, RoleSelectorForm, OrganizerForm, handle_form_errors
 
 from Vampiro.services.users import change_role
-from Vampiro.services.settings import get_game_status, get_round_status
+from Vampiro.services.settings import get_game_status, get_holidays, get_round_status
 from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills, get_current_danger, get_current_hunt, get_number_round_kills, get_number_total_kills, new_death_accusation, get_death_accusation, get_duel_where_hunter, get_duel_where_prey, set_prey_initial_response, reached_agreement, finalise_duel, set_hunter_duel_response, set_prey_duel_response, hunter_wins, get_current_dispute_by_prey, get_current_dispute_by_hunter
 from Vampiro.utils.security import handle_exceptions
 
@@ -115,6 +115,7 @@ def my_stats():
         else:
             on_hold = death_accusation is not None or duel is not None
 
+        holidays = get_holidays()
 
         ronda = get_round_number()
         kills = {
@@ -128,7 +129,7 @@ def my_stats():
             'duel_where_prey': get_duel_where_prey(player.id)
         }
 
-        return render_template('profile/my_stats.html',death_accusation_form=death_accusation_form, death_confirmation_form=death_confirmation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, on_hold=on_hold, kills=kills, disputes=disputes)
+        return render_template('profile/my_stats.html', death_accusation_form=death_accusation_form, death_confirmation_form=death_confirmation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, on_hold=on_hold, holidays=holidays, kills=kills, disputes=disputes)
 
 @profile.route('/my_stats/death_accusation', methods=['POST'])
 @handle_exceptions
