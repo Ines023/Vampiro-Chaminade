@@ -2,8 +2,9 @@
 
 from flask import flash
 from flask_wtf import FlaskForm
-from wtforms import RadioField, StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField, SelectField, widgets
+from wtforms import FileField, StringField, PasswordField, SubmitField, BooleanField, IntegerField, HiddenField, TextAreaField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo,  NumberRange
+from flask_wtf.file import FileRequired, FileAllowed
 
 from Vampiro.models.UserModel import User
 
@@ -132,3 +133,12 @@ class SettingsForm(FlaskForm):
     game_mode = SelectField('Modo de Juego', choices=[('vampiro', 'Vampiro'), ('cupido', 'Cupido')], validators=[DataRequired()])
     game_status = SelectField('Estado del Juego', choices=[('NOT_STARTED', 'Sin empezar'), ('REGISTRY_OPEN', 'Registro abierto'), ('IN_PROGRESS', 'Juego en proceso')], validators=[DataRequired()])
     SubmitField = SubmitField('Guardar')
+
+# ADMIN_FORM: DATA_REQUEST
+
+class UploadForm(FlaskForm):
+    file = FileField('Zip File with CSV', validators=[
+        FileRequired(),
+        FileAllowed(['zip'], 'Zip files only!')
+    ])
+    submit = SubmitField('Enviar')

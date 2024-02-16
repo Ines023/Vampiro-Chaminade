@@ -69,7 +69,7 @@ def create_app(config_class=Config, test_config=None):
 
         # Initial setting creation
         if Settings.query.count() == 0:
-            settings = Settings( mode='VAMPIRO', game_status='NOT_STARTED', round_status='PROCESSED', extension_status='NOT_EXTENDED', timer_switch=False, vacaciones=False)
+            settings = Settings( mode='VAMPIRO', game_status='NOT_STARTED', round_status='PROCESSED', extension_status='NOT_EXTENDED', timer_switch=False, holidays=False)
             db.session.add(settings)
 
         # Check if roles already exist

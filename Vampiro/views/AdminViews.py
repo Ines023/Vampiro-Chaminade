@@ -3,10 +3,12 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+
 
 from Vampiro.models.NewsletterModel import Cronicas
-from Vampiro.utils.forms import NewCronicaForm, DisputeInterventionForm, SettingsForm, handle_form_errors
-from Vampiro.services.admin_actions import activate_automation, activate_holidays, add_cronica, avisar_a_usuarios, deactivate_automation, deactivate_holidays
+from Vampiro.utils.forms import NewCronicaForm, DisputeInterventionForm, SettingsForm, UploadForm, handle_form_errors
+from Vampiro.services.admin_actions import activate_automation, activate_holidays, add_cronica, avisar_a_usuarios, deactivate_automation, deactivate_holidays, download_data, reset_tables, upload_data
 from Vampiro.utils.security import handle_exceptions
 from Vampiro.services.settings import get_game_status, get_mode, set_mode, set_game_status
 from Vampiro.services.game import admin_intervention, dispute_revision, get_alive_players, get_dispute_by_id, get_disputes_filtered, get_hunts_filtered, get_round_number, get_general_number_round_kills, revision_period_done, round_end, start_game
@@ -172,3 +174,29 @@ def intervencion_divina(accion):
 
     return render_template('admin/intervencion_divina.html')
 
+
+@admin.route('/database_management', methods=['GET', 'POST'])
+@handle_exceptions
+def database_management():
+
+    form = UploadForm()
+    
+    if form.validate_on_submit():
+        print('form validated')
+        return upload_data(form.file.data)
+    else:
+        print('form not validated')
+        print(form.errors)
+    return render_template('admin/upload.html', form=form)
+
+@admin.route('/download_data', methods=['GET'])
+@handle_exceptions
+def handle_download_data():
+    return download_data()
+
+@admin.route('/reset_tables', methods=['GET'])
+@handle_exceptions
+def handle_reset_tables():
+    reset_tables()
+    flash('Tablas reseteadas', 'success')
+    return redirect(url_for('admin.dashboard'))
