@@ -660,13 +660,6 @@ def revision_period_done():
     process_round()
 
 
-# AZURE SETUP ________________________________________________________________
-
-from azure.mgmt.web import WebSiteManagementClient
-from azure.identity import DefaultAzureCredential
-
-
-
 
 # GAME START _________________________________________________________________________
     
