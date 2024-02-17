@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/8c0479b6-aff5-4749-b33b-3fe2a5267744/resourceGroups/Vampiro/providers/Microsoft.Web/sites/vampiro",
+    "appService.deploySubpath": "."
+}
