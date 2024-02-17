@@ -1,26 +1,22 @@
-import azure.functions as func
 from datetime import datetime
+import logging
 import pytz
 
-from flask import logging
 from Vampiro.services.game import revision_period_done, dispute_revision, round_end
 from Vampiro.services.settings import get_timer_switch_value
 
-def main(mytimer: func.TimerRequest) -> None:
 
+def DatabaseUpdate():
     timer_switch_value = get_timer_switch_value()  
 
     if timer_switch_value == False:
-        logging.info('The timer is off')
+        print('The timer is off')
         return
     else:
-        logging.info('The timer is on')
+        print('The timer is on')
 
         spain_tz = pytz.timezone('Europe/Madrid')
         spain_timestamp = datetime.datetime.now(spain_tz)
-
-        if mytimer.past_due:
-            logging.info('The timer is past due!')
 
         current_day = spain_timestamp.strftime('%A')
         current_hour = spain_timestamp.hour
@@ -42,8 +38,3 @@ def main(mytimer: func.TimerRequest) -> None:
             elif current_hour == 12:
                 logging.info('Performing morning task, cheking night disputes')
                 dispute_revision('NIGHT')
-    
-    
-    
-    
-

@@ -41,10 +41,12 @@ def create_app(config_class=Config, test_config=None):
     from .views.AdminViews import admin
     from .views.PublicViews import public
     from .views.ProfileViews import profile
+    from .views.AutomationsViews import automation
     
     app.register_blueprint(public, url_prefix='/')
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(profile, url_prefix='/profile')
+    app.register_blueprint(automation, url_prefix='/automation')
 
     from Vampiro.services.settings import get_round_status, get_game_status
     @app.context_processor
