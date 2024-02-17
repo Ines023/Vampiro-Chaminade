@@ -1,3 +1,4 @@
+# Vampiro package initialization file
 import os
 from datetime import datetime
 from flask import Flask
