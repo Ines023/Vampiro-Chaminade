@@ -2,7 +2,7 @@
  
 Una aplicación web para automatizar el juego del Vampiro en el CMU Chaminade.
 
-It is meant to include a .env file with:
+It is meant to include the next enviroment variables in the configuration:
 
 SECRET_KEY
 SQLALCHEMY_DATABASE_URI
