@@ -87,3 +87,6 @@ def create_app(config_class=Config):
         db.session.commit()
 
     return app
+
+
+app = create_app()
