@@ -10,16 +10,11 @@ from config import Config
 
 login_manager = LoginManager()
 
-def create_app(config_class=Config, test_config=None):
+def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
 
     # CONFIG ___________________________________________________________________
     app.config.from_object(config_class)
-
-    if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        app.config.from_mapping(test_config)
 
     try:
         os.makedirs(app.instance_path)
