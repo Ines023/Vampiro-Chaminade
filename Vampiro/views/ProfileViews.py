@@ -55,10 +55,10 @@ def role_selector():
         role = role_selector_form.response.data
         if role == 'visitor':
             role_id = 3
-            logger.info('User %s has selected the role of visitor', current_user.username)
+            logger.info('User %s has selected the role of visitor', current_user)
         elif role == 'player':
             role_id = 2
-            logger.info('User %s has selected the role of player', current_user.username)
+            logger.info('User %s has selected the role of player', current_user)
         change_role(current_user, role_id)
 
         return redirect(url_for('profile.role_selector'))
@@ -68,7 +68,7 @@ def role_selector():
             #id for admin role, using names was giving issues
             admin=1
             change_role(current_user, admin)
-            logger.info('User %s has selected the role of organizer', current_user.username)
+            logger.info('User %s has selected the role of organizer', current_user)
             return redirect(url_for('admin.dashboard'))
         else:
             flash('El código no es correcto', 'warning')
@@ -96,7 +96,7 @@ def my_stats():
             'duel': get_duel_where_hunter(player.id),
         }
 
-        logger.info('Dead user %s is viewing their stats', current_user.username)
+        logger.info('Dead user %s is viewing their stats', current_user)
         return render_template('profile/my_stats_dead.html', duel_response_form_hunter=duel_response_form_hunter, player=player, last_prey=last_prey, ronda=ronda, total_kills=total_kills, pending_disputes=pending_disputes)
 
     else:
@@ -136,7 +136,7 @@ def my_stats():
             'duel_where_prey': get_duel_where_prey(player.id)
         }
 
-        logger.info('Alive user %s is viewing their stats', current_user.username)
+        logger.info('Alive user %s is viewing their stats', current_user)
         return render_template('profile/my_stats.html', death_accusation_form=death_accusation_form, death_confirmation_form=death_confirmation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, on_hold=on_hold, holidays=holidays, kills=kills, disputes=disputes)
 
 @profile.route('/my_stats/death_accusation', methods=['POST'])
