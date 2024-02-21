@@ -171,4 +171,4 @@ def reset_password_token(token):
     else:
         handle_form_errors(form)
 
-    return render_template('public/reset/reset_password_token.html', form=form, token=token)
+    return render_template('public/reset/reset_with_token.html', form=form, token=token)
