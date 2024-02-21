@@ -12,6 +12,7 @@ import zipfile
 import shutil
 from werkzeug.utils import secure_filename
 
+from Vampiro import app
 from Vampiro.database.mysql import db
 from Vampiro.models.SettingsModel import Settings
 from Vampiro.models.UserModel import User
@@ -110,6 +111,7 @@ def reset_tables():
     db.session.add(settings)
     db.session.commit()
     print('Tables reset successfully')
+    app.logger.info('Tables reset successfully')
 
 def upload_data(file):
     if file and zipfile.is_zipfile(file):

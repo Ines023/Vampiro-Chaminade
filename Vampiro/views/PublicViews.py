@@ -5,6 +5,7 @@ from flask import Blueprint, current_app, render_template, request, redirect, ur
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
 
+from Vampiro import app
 from Vampiro.models.UserModel import User
 from Vampiro.models.NewsletterModel import Cronicas
 from Vampiro.utils.forms import LoginForm, handle_form_errors, SignUpForm, EmailForm, NewPasswordForm
@@ -48,9 +49,11 @@ def login():
         if user and check_password_hash(user.password_hashed, form.password.data):
             if user.confirmed:
                 login_user(user, remember=form.remember_me.data)
+                app.logger.info('Usuario %s ha iniciado sesión', user)
                 return redirect(request.args.get('next') or url_for('profile.role_selector'))
             else:
-                flash('Por favor confirma tu correo antes de iniciar sesión.', 'warning')
+                flash('Por favor confirma tu correo antes de iniciar sesión.', 'success')
+                send_confirmation_instructions_email(user)
                 return redirect(url_for('public.resend_confirmation'))
         else:
             flash('Usuario o contraseña incorrectos', 'danger')
@@ -76,6 +79,7 @@ def signup():
     form = SignUpForm(request.form)
     if request.method == 'POST' and form.validate_on_submit():
         new_user = add_user(form)
+        app.logger.info('Nuevo usuario añadido: %s', new_user)
         send_confirmation_instructions_email(new_user)
         flash('Te has registrado con éxito. Por favor, confirma tu correo.', 'success')
         return redirect(url_for('public.home'))
@@ -96,6 +100,7 @@ def resend_confirmation():
                 flash ('Mejor más que menos, pero tu cuenta ya estaba confirmada. No hacer falta RE-confirmar. ¡Puedes iniciar sesión si quieres!', 'success')
                 return redirect(url_for('public.login'))
             else:
+                app.logger.info('Usuario %s ha solicitado reenviar las instrucciones de confirmacion', user)
                 send_confirmation_instructions_email(user)
                 flash('Se han reenviado las instrucciones de confirmación a tu correo.', 'success')
     else:
@@ -115,6 +120,7 @@ def confirm(token):
         return redirect(url_for('public.login'))
     else:
         confirm_user(user)
+        app.logger.info('Usuario %s ha confirmado su cuenta', user)
         flash ('Acabas de confrimar tu cuenta... ¡Qué guay!', 'success')
         send_welcome_email(user)
             
@@ -131,6 +137,7 @@ def reset_password():
     if request.method == 'POST' and form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
+            app.logger.info('Usuario %s ha solicitado cambiar su contraseña', user)
             send_password_reset_instructions_email(user)
             flash('Por favor comprueba tu correo. Has recibido un link para cambiar tu contraseña', 'success')
         else:
@@ -155,6 +162,7 @@ def reset_password_token(token):
 
     if request.method == 'POST' and form.validate_on_submit():
         update_password(user, form)
+        app.logger.info('Contraseña cambiada para el usuario %s', user)
         send_password_changed_email(user)
         flash('Tu contraseña ha sido cambiada.', 'success')
         return redirect(url_for('public.login'))
@@ -162,10 +170,3 @@ def reset_password_token(token):
         handle_form_errors(form)
 
     return render_template('public/reset/reset_password_token.html', form=form, token=token)
-
-
-# TESTS ______________________________________________________________________
-
-@public.route('/test/<pagina>')
-def test(pagina):
-    return render_template('email/'+pagina+'.html', user=current_user)

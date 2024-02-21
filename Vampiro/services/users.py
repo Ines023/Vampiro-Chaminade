@@ -4,6 +4,7 @@ import datetime
 
 from flask import flash
 
+from Vampiro import app
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import User, Role
 
@@ -22,6 +23,7 @@ def add_user(form):
     db.session.add(new_user)
     db.session.flush()  # Flush the session to update the role relationship
     db.session.commit()
+    app.logger.info('Usuario creado: %s', new_user)
     return new_user
 
 def confirm_user(user):
@@ -30,6 +32,7 @@ def confirm_user(user):
     """
     user.confirmed_at = datetime.datetime.now()
     db.session.add(user)
+    app.logger.info('Usuario confirmado: %s', user)
     db.session.commit()
 
 
@@ -76,6 +79,7 @@ def update_password(user, form):
     Updates the password of a user
     """
     user.password = form.password.data
-    
+
     db.session.add(user)
     db.session.commit()
+    app.logger.info('Contraseña actualizada: %s', user)

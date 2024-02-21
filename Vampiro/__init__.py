@@ -1,14 +1,19 @@
 # Vampiro package initialization file
 import os
 from datetime import datetime
+from applicationinsights.flask.ext import AppInsights
 from flask import Flask
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
+from logging import StreamHandler
+import logging
 
 from .database.mysql import db
 from config import Config
 
 login_manager = LoginManager()
+appinsights = AppInsights()
+streamHandler = StreamHandler()
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
@@ -85,6 +90,22 @@ def create_app(config_class=Config):
             db.session.add(admin)
 
         db.session.commit()
+
+    # LOGGING __________________________________________________________________
+        
+    appinsights.init_app(app)
+
+
+    @app.after_request
+    def after_request(response):
+        appinsights.flush()
+        return response
+
+    app.logger.addHandler(streamHandler)
+    app.logger.setLevel(logging.INFO)
+
+    for logHandler in app.logger.handlers:
+        logHandler.setFormatter(logging.Formatter('[FLASK-SAMPLE][%(levelname)s]%(message)s'))
 
     return app
 

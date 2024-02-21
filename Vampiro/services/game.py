@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import and_, func
 
+from Vampiro import app
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import Hunt, Player, Dispute, Revision_Group
 from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_game_status, set_round_status
@@ -50,6 +51,7 @@ def new_player(user_id):
     player = Player(id=user_id, alive=True)
     db.session.add(player)
     db.session.commit()
+    app.logger.info('New player created: %s', player)
 
 # PLAYER GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -82,6 +84,7 @@ def kill(player):
     """
     player.alive = False
     db.session.commit()
+    app.logger.info('Player killed: %s', player)
 
 
 # HUNT FUNCTIONS ______________________________________________________________________
@@ -96,6 +99,7 @@ def new_hunt(hunt_pair, round_number):
     hunt = Hunt(date=date, round=round_number, room_hunter=hunt_pair[0], room_prey=hunt_pair[1], success=False)
     db.session.add(hunt)
     db.session.commit()
+    app.logger.info('New hunt created: %s', hunt)
 
 
 # HUNT GETTERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -124,6 +128,7 @@ def hunt_success(hunt):
     """
     hunt.success = True
     db.session.commit()
+    app.logger.info('Hunt success: %s', hunt)
 
 # HUNT RESOLUTION FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -171,7 +176,7 @@ def new_death_accusation(room_hunter):
     db.session.add(dispute)
     db.session.commit()
 
-
+    app.logger.info('New death accusation started: %s', dispute)
     #Email
     send_death_accusation_email(hunt.prey,dispute.revision_group)
 
@@ -290,6 +295,7 @@ def set_prey_initial_response(room_prey, response):
     dispute = get_current_dispute_by_prey(room_prey)
     dispute.prey_response = response
     db.session.commit()
+    app.logger.info('Prey initial response set: %s', dispute)
 
 def set_hunter_duel_response(dispute, response):
     """
@@ -297,6 +303,7 @@ def set_hunter_duel_response(dispute, response):
     """
     dispute.hunter_duel_response = response
     db.session.commit()
+    app.logger.info('Hunter duel response set: %s', dispute)
 
 def set_prey_duel_response(dispute, response):
     """
@@ -304,6 +311,7 @@ def set_prey_duel_response(dispute, response):
     """
     dispute.prey_duel_response = response
     db.session.commit()
+    app.logger.info('Prey duel response set: %s', dispute)
 
 def deactivate_dispute(dispute):
     """
@@ -311,6 +319,7 @@ def deactivate_dispute(dispute):
     """
     dispute.active = False
     db.session.commit()
+    app.logger.info('Dispute deactivated: %s', dispute)
 
 
 
@@ -323,8 +332,10 @@ def reached_agreement(dispute):
     """
     if dispute.agreed_response == None:
         reached = False
+        app.logger.info('Dispute NOT reached agreement: %s', dispute)
     else:
         reached = True
+        app.logger.info('Dispute reached agreement: %s', dispute)
     return reached
 
 def random_duel_winner(dispute):
@@ -332,6 +343,7 @@ def random_duel_winner(dispute):
     Returns a random winner (player object) for the duel
     """
     winner = random.choice([dispute.hunt.hunter, dispute.hunt.prey])
+    app.logger.info('Random duel winner: %s', winner)
     return winner
 
 def duel_winner(dispute):
@@ -345,6 +357,7 @@ def duel_winner(dispute):
             winner = dispute.hunt.prey
     else:
         winner = random_duel_winner(dispute)
+    app.logger.info('Duel winner: %s', winner)
     return winner
 
 
@@ -361,12 +374,14 @@ def finalise_duel(dispute):
 
 
     if winner == killer:
+        app.logger.info('Hunter wins the duel: %s', killer)
         hunter_wins(dispute)
         
         send_duel_hunter_win_email(killer)
         send_duel_prey_loss_email(victim)
     else:
         # prey wins
+        app.logger.info('Prey wins the duel: %s', victim)
 
         send_duel_hunter_loss_email(killer)
         send_duel_prey_win_email(victim)
@@ -392,10 +407,12 @@ def admin_intervention(dispute, winner):
                 
         send_duel_hunter_win_email(killer)
         send_duel_prey_loss_email(victim)
+        app.logger.info('Admin decided Hunter wins the duel: %s', killer)
     elif winner == 'Prey':
         # prey wins
         send_duel_hunter_loss_email(dispute.hunt.hunter)
         send_duel_prey_win_email(dispute.hunt.prey)
+        app.logger.info('Admin decided Prey wins the duel: %s', victim)
 
     deactivate_dispute(dispute)
 
@@ -530,12 +547,14 @@ def death_accusation_revision(revision_group):
     if acusaciones_pendientes:
         for acusacion in acusaciones_pendientes:
             hunter_wins(acusacion)
+    app.logger.info('death accusation revision done')
 
 def duel_revision(revision_group):
     duelos_pendientes = get_general_duels(revision_group=revision_group)
     if duelos_pendientes:
         for duelo in duelos_pendientes:
             finalise_duel(duelo)
+    app.logger.info('duel revision done')
 
 def dispute_revision(revision_group):
     """
@@ -546,6 +565,7 @@ def dispute_revision(revision_group):
     death_accusation_revision(revision_group)
     duel_revision(revision_group)
     print('dispute revision done')
+    app.logger.info('dispute revision done')
 
 # Routinary round management ---------------------------------- AT 12AM AND 12PM
     
@@ -569,6 +589,7 @@ def deaths_from_starvation():
         for player in unsuccessful_players:
             send_deadline_extension_email(player)
         set_extension_status('EXTENDED')
+        app.logger.info('Deadline has been extended')
     else:  
         print('inside anihilation by starvation')
         print('unsuccessful players:', unsuccessful_players)
@@ -576,7 +597,7 @@ def deaths_from_starvation():
             kill(player)
             send_starvation_email(player)
         db.session.commit()
-
+        app.logger.info('Starvation deaths done')
 
 def generate_pairs():
 
@@ -587,6 +608,7 @@ def generate_pairs():
     rooms = [player.room for player in alive_players]
     random.shuffle(rooms)
     pairs = [(rooms[i], rooms[(i+1) % len(rooms)]) for i in range(len(rooms))]
+    app.logger.info('Pairs generated: %s', pairs)
     return pairs
 
 def new_round():
@@ -602,6 +624,8 @@ def new_round():
         hunter = get_player(pair[0])
         prey = get_player(pair[1])
         send_new_round_hunt_email(hunter, prey)
+    
+    app.logger.info('New round started: %s', new_round_number)
 
 
 def process_round():
@@ -616,7 +640,8 @@ def process_round():
         deaths_from_starvation()
         print('deaths from starvation done')
         set_round_status('PROCESSED')
-        print ('round status set to processed') 
+        print ('round status set to processed')
+        app.logger.info('Round processed') 
 
         jugadores_restantes = get_alive_players()
 
@@ -628,6 +653,7 @@ def process_round():
             game_over()
 
     else:
+        app.logger.info('round was not due to be finalised')
         print('round was not due to be finalised')
         pass
 
@@ -642,8 +668,10 @@ def round_end():
     disputas_pendientes = get_general_disputes()
     if disputas_pendientes:
         set_round_status('PENDING')
+        app.logger.info('Dispute revision period activated')
     else:
         set_round_status('TO_BE_FINALISED')
+        app.logger.info('Dispute revision period not needed')
     process_round()
 
 # MONDAY 12:00
@@ -656,7 +684,8 @@ def revision_period_done():
     round_status = get_round_status()
     if round_status.value == 'PENDING':
         set_round_status('TO_BE_FINALISED')
-    
+
+    app.logger.info('Revision period done')
     process_round()
 
 
@@ -672,7 +701,7 @@ def start_game():
     for user in users:
         new_player(user.id)
     new_round()
-
+    app.logger.info('Game started')
     pass
 
 
@@ -684,8 +713,10 @@ def game_over():
 
     if len(jugadores_vivos) == 1:
         ganador = jugadores_vivos[0]
+        app.logger.info('Game over, winner: %s', ganador)
     else:
         ganador = None
+        app.logger.info('Game over, no winner')
     
 
     players = Player.query.all()
