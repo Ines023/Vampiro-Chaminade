@@ -20,24 +20,24 @@
                 <h2 class="fw-bold mb-2 text-uppercase">CAMBIO DE CONTRASEÑA</h2>
                 <p class="text-white-50 mb-5">Escoje tu nueva contraseña.<br> Aunque no recomendamos que tus contraseñas sean "1234" intenta coger algo de lo que no te vayas a olvidar esta vez.<br><br><span class="small">"Contraseña" tampoco es buena opción</span></p>
 
-                <form action="{{ url_for('public.reset_with_token', token=token) }}" method="post">
+                <form action="{{ url_for('public.reset_password_token', token=token) }}" method="post">
 
                 <!-- Password input -->
                 <div class="form-outline form-white mb-4">
-                    {{ form.password.label }}: {{ form.password (class="form-control form-control-lg")}}
-                  </div>
+                  {{ form.password.label }}: {{ form.password (class="form-control form-control-lg")}}
+                </div>
 
                 <!-- Confirm Password input -->
                 <div class="form-outline form-white mb-1">
-                {{ form.confirm_password.label }}: {{ form.confirm_password (class="form-control form-control-lg")}}
-                </div>
+                  {{ form.confirm_password.label }}: {{ form.confirm_password (class="form-control form-control-lg")}}
+                
 
                   <!-- Security token -->
                   {{ form.csrf_token }}
                 </div>
 
                 <!-- Submit button -->
-                {{ form.submit(class_="btn btn-danger btn-block mb-4") }}
+                {{ form.submit (class_="btn btn-danger btn-block mb-4") }}
 
                 </form>
 
