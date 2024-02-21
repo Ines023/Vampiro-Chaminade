@@ -11,14 +11,15 @@ import tempfile
 import zipfile
 import shutil
 from werkzeug.utils import secure_filename
+import logging
 
-from Vampiro import app
 from Vampiro.database.mysql import db
 from Vampiro.models.SettingsModel import Settings
 from Vampiro.models.UserModel import User
 from Vampiro.services.settings import set_holidays, set_timer_switch_value
 from Vampiro.utils.emails import send_game_starting_soon_email
 
+logger = logging.getLogger('simple_logger')
 
 # CRONICAS _________________________________________________________________
 
@@ -111,7 +112,7 @@ def reset_tables():
     db.session.add(settings)
     db.session.commit()
     print('Tables reset successfully')
-    app.logger.info('Tables reset successfully')
+    logger.info('Tables reset successfully')
 
 def upload_data(file):
     if file and zipfile.is_zipfile(file):

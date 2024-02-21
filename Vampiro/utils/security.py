@@ -4,11 +4,13 @@ from flask_login import current_user
 from .emails import send_error_email
 from authlib.jose import jwt
 from authlib.jose.errors import BadSignatureError, ExpiredTokenError
+import logging
 
-from Vampiro import app
 from Vampiro.models.UserModel import User
 
 from functools import wraps
+
+logger = logging.getLogger('simple_logger')
 
 # TOKEN HANDLERS ______________________________________________________________________________________
 
@@ -19,14 +21,14 @@ def verify_confirmation_token(token):
         claims = jwt.decode(token, private_key)
         claims.validate() 
         user_id = claims['confirm_email']
-        app.logger.info('Usuario ha usado un token valido: %s', user_id)
+        logger.info('Usuario ha usado un token valido: %s', user_id)
     except BadSignatureError:
         flash("Tu link de confirmación no es válido.", "danger")
-        app.logger.info('Se ha usado un token de confirmación no válido')
+        logger.info('Se ha usado un token de confirmación no válido')
         return None
     except ExpiredTokenError:
         flash("Tu link de confirmación ha caducado.", "warning")
-        app.logger.info('Se ha usado un token de confirmación caducado')
+        logger.info('Se ha usado un token de confirmación caducado')
         return None
     return User.query.get(user_id)
 
@@ -36,14 +38,14 @@ def verify_reset_token(token):
         claims = jwt.decode(token, private_key)
         claims.validate() 
         user_id = claims['reset_password']
-        app.logger.info('Usuario ha usado un token valido: %s', user_id)
+        logger.info('Usuario ha usado un token valido: %s', user_id)
     except BadSignatureError:
         flash("Tu link de cambio de contraseña no es válido.", "danger")
-        app.logger.info('Se ha usado un token de cambio de contraseña no válido')
+        logger.info('Se ha usado un token de cambio de contraseña no válido')
         return None
     except ExpiredTokenError:
         flash("Tu link de cambio de contraseña ha caducado.", "warning")
-        app.logger.info('Se ha usado un token de cambio de contraseña caducado')
+        logger.info('Se ha usado un token de cambio de contraseña caducado')
         return None
     return User.query.get(user_id)
 

@@ -5,8 +5,9 @@ from flask import render_template, request
 import json
 
 import requests
+import logging
 
-from Vampiro import app
+logger = logging.getLogger('simple_logger')
 
 # EMAIL SENDING THROUGH AZURE TOOL _____________________________________________________
 
@@ -32,9 +33,9 @@ def send_email(subject, message, recipient):
     #   Check the response
     if response.status_code != 200:
         print(f"Failed to send email: {response.content}")
-        app.logger.info(f"Failed to send email: {response.content}")
+        logger.info(f"Failed to send email: {response.content}")
     else:
-        app.logger.info(f"Email sent to {recipient}")
+        logger.info(f"Email sent to {recipient}")
     
 
 # USER EMAILS _________________________________________________________________________
@@ -52,7 +53,7 @@ def send_confirmation_instructions_email(user):
     message = render_template('email/confirmacion_instrucciones.html', user=user, token=url_encoded_token)
     recipient = user.email
 
-    app.logger.info('Email de confirmación enviado a %s', recipient)
+    logger.info('Email de confirmación enviado a %s', recipient)
     send_email(subject, message, recipient)   
 
 def send_welcome_email(user):
@@ -65,7 +66,7 @@ def send_welcome_email(user):
     message = render_template('email/welcome.html', user=user)
     recipient = user.email
 
-    app.logger.info('Email de bienvenida enviado a %s', recipient)
+    logger.info('Email de bienvenida enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_password_reset_instructions_email(user):
@@ -81,7 +82,7 @@ def send_password_reset_instructions_email(user):
     message = render_template('email/contraseña_reset_instrucciones.html', user=user, token=url_encoded_token)
     recipient = user.email
 
-    app.logger.info('Email de cambio de contraseña enviado a %s', recipient)
+    logger.info('Email de cambio de contraseña enviado a %s', recipient)
     send_email(subject, message, recipient) 
 
 def send_password_changed_email(user):
@@ -93,7 +94,7 @@ def send_password_changed_email(user):
     message = render_template('email/contraseña_reset_completada.html', user=user)
     recipient = user.email
 
-    app.logger.info('Email de contraseña cambiada a %s', recipient)
+    logger.info('Email de contraseña cambiada a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_game_starting_soon_email(user):
@@ -105,7 +106,7 @@ def send_game_starting_soon_email(user):
     message = render_template('email/game_starting_soon.html', user=user)
     recipient = user.email
 
-    app.logger.info('Email de inicio de juego enviado a %s', recipient)
+    logger.info('Email de inicio de juego enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_game_finished_email(player, ganador=None):
@@ -117,15 +118,15 @@ def send_game_finished_email(player, ganador=None):
         if player == ganador:
             subject = "Y el último en pie... ¡Eres tú!"
             message = render_template('email/game_finished_you_won.html', user=player.user)
-            app.logger.info('Email de fin de juego GANADOR enviado a %s', player.user.email)
+            logger.info('Email de fin de juego GANADOR enviado a %s', player.user.email)
         else:
             subject = "Y sólo quedó uno en pie..."
             message = render_template('email/game_finished_yeswinner.html', user=player.user, winner=ganador.user)
-            app.logger.info('Email de fin de juego con ganador enviado a %s', player.user.email)
+            logger.info('Email de fin de juego con ganador enviado a %s', player.user.email)
     else:
         subject = "Todo fue inundado por silencio..."
         message = render_template('email/game_finished_nowinner.html', user=player.user)
-        app.logger.info('Email de fin de juego SIN ganador enviado a %s', player.user.email)
+        logger.info('Email de fin de juego SIN ganador enviado a %s', player.user.email)
     
     recipient = player.user.email
 
@@ -144,7 +145,7 @@ def send_new_round_hunt_email(player,prey):
     message = render_template('email/new_round.html', player=player, prey=prey)
     recipient = player.user.email
 
-    app.logger.info('Email de inicio de ronda enviado a %s', recipient)
+    logger.info('Email de inicio de ronda enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_starvation_email(player):
@@ -153,7 +154,7 @@ def send_starvation_email(player):
     message = render_template('email/starvation.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de muerte por inanicion enviado a %s', recipient)
+    logger.info('Email de muerte por inanicion enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_deadline_extension_email(player):
@@ -164,7 +165,7 @@ def send_deadline_extension_email(player):
     message = render_template('email/deadline_extension.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de extensión de plazo enviado a %s', recipient)
+    logger.info('Email de extensión de plazo enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 
@@ -181,7 +182,7 @@ def send_death_accusation_email(player, revision_group):
     message = render_template('email/death_accusation.html', player=player, hora=hora)
     recipient = player.user.email
 
-    app.logger.info('Email de acusación de muerte enviado a %s', recipient)
+    logger.info('Email de acusación de muerte enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 #   HUNT: COMPLETION
@@ -192,7 +193,7 @@ def send_hunt_success_email(hunter, prey):
     message = render_template('email/hunt_success.html', hunter=hunter, prey=prey)
     recipient = hunter.user.email
 
-    app.logger.info('Email de caza exitosa enviado a %s', recipient)
+    logger.info('Email de caza exitosa enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_victim_death_email(player):
@@ -201,7 +202,7 @@ def send_victim_death_email(player):
     message = render_template('email/victim_death.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de muerte de presa enviado a %s', recipient)
+    logger.info('Email de muerte de presa enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 #   DISPUTE: DUEL START
@@ -217,7 +218,7 @@ def send_duel_started_email(player, revision_group):
     message = render_template('email/duel_started.html', player=player, hora=hora)
     recipient = player.user.email
 
-    app.logger.info('Email de inicio de duelo enviado a %s', recipient)
+    logger.info('Email de inicio de duelo enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 #   DISPUTE: DUEL RESOLUTION
@@ -228,7 +229,7 @@ def send_duel_hunter_win_email(player):
     message = render_template('email/duel_hunter_win.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de victoria de duelo de cazador enviado a %s', recipient)
+    logger.info('Email de victoria de duelo de cazador enviado a %s', recipient)
     send_email(subject, message, recipient)
     
 def send_duel_prey_win_email(player):
@@ -237,7 +238,7 @@ def send_duel_prey_win_email(player):
     message = render_template('email/duel_prey_win.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de victoria de duelo de presa enviado a %s', recipient)
+    logger.info('Email de victoria de duelo de presa enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_duel_hunter_loss_email(player):
@@ -246,7 +247,7 @@ def send_duel_hunter_loss_email(player):
     message = render_template('email/duel_hunter_loss.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de derrota de cazador enviado a %s', recipient)
+    logger.info('Email de derrota de cazador enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_duel_prey_loss_email(player):
@@ -255,7 +256,7 @@ def send_duel_prey_loss_email(player):
     message = render_template('email/duel_prey_loss.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de derrota de presa enviado a %s', recipient)
+    logger.info('Email de derrota de presa enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 def send_hunt_available_email(player):
@@ -264,7 +265,7 @@ def send_hunt_available_email(player):
     message = render_template('email/hunt_available.html', player=player)
     recipient = player.user.email
 
-    app.logger.info('Email de caza disponible enviado a %s', recipient)
+    logger.info('Email de caza disponible enviado a %s', recipient)
     send_email(subject, message, recipient)
 
 
@@ -279,5 +280,5 @@ def send_error_email(error, jugador, pagina):
     message = f"A {jugador} en la página {pagina} le ha saltado este error: {error}"
     recipient = "auladejuegos@gmail.com"
 
-    app.logger.info('Email de error enviado a %s', recipient)
+    logger.info('Email de error enviado a %s', recipient)
     send_email(subject, message, recipient)

@@ -1,10 +1,10 @@
 # /Vampiro/views/ProfileViews.py
 
 import os
+import logging
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
-from Vampiro import app
 
 from Vampiro.models.SettingsModel import GameStatus
 from Vampiro.utils.emails import send_duel_started_email, send_hunt_success_email, send_victim_death_email
@@ -15,6 +15,8 @@ from Vampiro.services.users import change_role
 from Vampiro.services.settings import get_game_status, get_holidays, get_round_status
 from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills, get_current_danger, get_current_hunt, get_number_round_kills, get_number_total_kills, new_death_accusation, get_death_accusation, get_duel_where_hunter, get_duel_where_prey, set_prey_initial_response, reached_agreement, finalise_duel, set_hunter_duel_response, set_prey_duel_response, hunter_wins, get_current_dispute_by_prey, get_current_dispute_by_hunter
 from Vampiro.utils.security import handle_exceptions
+
+logger = logging.getLogger('simple_logger')
 
 profile = Blueprint('profile', __name__)
 
@@ -53,10 +55,10 @@ def role_selector():
         role = role_selector_form.response.data
         if role == 'visitor':
             role_id = 3
-            app.logger.info('User %s has selected the role of visitor', current_user.username)
+            logger.info('User %s has selected the role of visitor', current_user.username)
         elif role == 'player':
             role_id = 2
-            app.logger.info('User %s has selected the role of player', current_user.username)
+            logger.info('User %s has selected the role of player', current_user.username)
         change_role(current_user, role_id)
 
         return redirect(url_for('profile.role_selector'))
@@ -66,7 +68,7 @@ def role_selector():
             #id for admin role, using names was giving issues
             admin=1
             change_role(current_user, admin)
-            app.logger.info('User %s has selected the role of organizer', current_user.username)
+            logger.info('User %s has selected the role of organizer', current_user.username)
             return redirect(url_for('admin.dashboard'))
         else:
             flash('El código no es correcto', 'warning')
@@ -94,7 +96,7 @@ def my_stats():
             'duel': get_duel_where_hunter(player.id),
         }
 
-        app.logger.info('Dead user %s is viewing their stats', current_user.username)
+        logger.info('Dead user %s is viewing their stats', current_user.username)
         return render_template('profile/my_stats_dead.html', duel_response_form_hunter=duel_response_form_hunter, player=player, last_prey=last_prey, ronda=ronda, total_kills=total_kills, pending_disputes=pending_disputes)
 
     else:
@@ -134,7 +136,7 @@ def my_stats():
             'duel_where_prey': get_duel_where_prey(player.id)
         }
 
-        app.logger.info('Alive user %s is viewing their stats', current_user.username)
+        logger.info('Alive user %s is viewing their stats', current_user.username)
         return render_template('profile/my_stats.html', death_accusation_form=death_accusation_form, death_confirmation_form=death_confirmation_form, duel_response_form_hunter=duel_response_form_hunter, duel_response_form_prey=duel_response_form_prey, player=player, hunter=hunter, prey=prey, on_hold=on_hold, holidays=holidays, kills=kills, disputes=disputes)
 
 @profile.route('/my_stats/death_accusation', methods=['POST'])
@@ -144,7 +146,7 @@ def death_accusation():
     Handles the form submission for the death accusation form.
     If the hunter informs of a murder, the victim will be asked over email to report.
     """
-    app.logger.info('Death accusation route visited')
+    logger.info('Death accusation route visited')
     form = DeathAccusationForm()
     player = current_user.player
 
@@ -161,7 +163,7 @@ def death_confirmation():
     If the prey denies the death, the hunter is informed and the dispute becomes a duel, its revision group is updated.
     """
 
-    app.logger.info('Death confirmation route visited')
+    logger.info('Death confirmation route visited')
     form = DeathConfirmationForm()
     player = current_user.player
     
@@ -198,7 +200,7 @@ def duel_response():
     If both players agree on the duel, the dispute is finalised.
     If not in time, it will be handled by the automatic revision every 12 hours."""
 
-    app.logger.info('Duel response route visited')
+    logger.info('Duel response route visited')
     form = DuelResponseForm()
 
     if form.validate_on_submit():

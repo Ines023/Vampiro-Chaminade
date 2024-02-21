@@ -1,8 +1,13 @@
 # /Vampiro/services/settings.py
 
-from Vampiro import app
+import logging
+
+
 from Vampiro.database.mysql import db
 from Vampiro.models.SettingsModel import Settings
+
+
+logger = logging.getLogger('simple_logger')
 
 # SETTINGS GETTERS _________________________________________________________________________
 
@@ -70,7 +75,7 @@ def set_mode(mode):
     settings = get_settings()
     settings.mode = mode
     db.session.commit()
-    app.logger.info('Modo de juego cambiado a: %s', mode)
+    logger.info('Modo de juego cambiado a: %s', mode)
 
 def set_game_status(game_status):
     """
@@ -79,7 +84,7 @@ def set_game_status(game_status):
     settings = get_settings()
     settings.game_status = game_status
     db.session.commit()
-    app.logger.info('Estado de juego cambiado a: %s', game_status)
+    logger.info('Estado de juego cambiado a: %s', game_status)
 
 def set_round_status(round_status):
     """
@@ -88,7 +93,7 @@ def set_round_status(round_status):
     settings = get_settings()
     settings.round_status = round_status
     db.session.commit()
-    app.logger.info('Estado de ronda cambiado a: %s', round_status)
+    logger.info('Estado de ronda cambiado a: %s', round_status)
 
 def set_extension_status(extension_status):
     """
@@ -97,7 +102,7 @@ def set_extension_status(extension_status):
     settings = get_settings()
     settings.extension_status = extension_status
     db.session.commit()
-    app.logger.info('Estado de extension cambiado a: %s', extension_status)
+    logger.info('Estado de extension cambiado a: %s', extension_status)
 
 def set_timer_switch_value(value):
     """
@@ -106,7 +111,7 @@ def set_timer_switch_value(value):
     settings = get_settings()
     settings.timer_switch = value
     db.session.commit()
-    app.logger.info('Timer switch cambiado a: %s', value)
+    logger.info('Timer switch cambiado a: %s', value)
 
 def set_holidays(value):
     """
@@ -115,4 +120,4 @@ def set_holidays(value):
     settings = get_settings()
     settings.holidays = value
     db.session.commit()
-    app.logger.info('Vacaciones cambiado a: %s', value)
+    logger.info('Vacaciones cambiado a: %s', value)

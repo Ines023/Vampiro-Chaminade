@@ -1,12 +1,15 @@
 # /Vampiro/services/users.py
 
 import datetime
+import logging
 
 from flask import flash
 
-from Vampiro import app
+
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import User, Role
+
+logger = logging.getLogger('simple_logger')
 
 # REGISTRATION ________________________________________________________________
 def add_user(form):
@@ -23,7 +26,7 @@ def add_user(form):
     db.session.add(new_user)
     db.session.flush()  # Flush the session to update the role relationship
     db.session.commit()
-    app.logger.info('Usuario creado: %s', new_user)
+    logger.info('Usuario creado: %s', new_user)
     return new_user
 
 def confirm_user(user):
@@ -32,7 +35,7 @@ def confirm_user(user):
     """
     user.confirmed_at = datetime.datetime.now()
     db.session.add(user)
-    app.logger.info('Usuario confirmado: %s', user)
+    logger.info('Usuario confirmado: %s', user)
     db.session.commit()
 
 
@@ -82,4 +85,4 @@ def update_password(user, form):
 
     db.session.add(user)
     db.session.commit()
-    app.logger.info('Contraseña actualizada: %s', user)
+    logger.info('Contraseña actualizada: %s', user)
