@@ -4,6 +4,8 @@ from urllib.parse import quote_plus
 from flask import render_template, request
 import json
 
+import requests
+
 # EMAIL SENDING THROUGH AZURE TOOL _____________________________________________________
 
 def send_email(subject, message, recipient):
@@ -23,7 +25,7 @@ def send_email(subject, message, recipient):
 
     #   Send the HTTP request
     headers = {'Content-Type': 'application/json'}
-    response = request.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
 
     #   Check the response
     if response.status_code != 200:

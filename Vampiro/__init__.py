@@ -63,7 +63,7 @@ def create_app(config_class=Config):
     migrate = Migrate(app, db)
 
     with app.app_context():
-        db.create_all(checkfirst=True)
+        db.create_all()
 
         # Initial setting creation
         if Settings.query.count() == 0:
