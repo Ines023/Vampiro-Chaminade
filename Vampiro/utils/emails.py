@@ -243,7 +243,7 @@ def send_duel_prey_win_email(player):
 
 def send_duel_hunter_loss_email(player):
 
-    subject = "A medianoche pasaste a mejor vida"
+    subject = "Los recuerdos son difusos"
     message = render_template('email/duel_hunter_loss.html', player=player)
     recipient = player.user.email
 
