@@ -117,7 +117,8 @@ def get_last_prey(hunter_room):
     """
     Returns the last prey of a given hunter id
     """
-    last_prey = Hunt.query.filter_by(room_hunter=hunter_room).order_by(Hunt.date.desc()).first()
+    last_hunt = Hunt.query.filter_by(room_hunter=hunter_room).order_by(Hunt.date.desc()).first()
+    last_prey = last_hunt.prey
     return last_prey
 
 def get_current_danger(prey_room):
