@@ -13,7 +13,7 @@ from Vampiro.utils.forms import DeathAccusationForm, DeathConfirmationForm, Duel
 
 from Vampiro.services.users import change_role
 from Vampiro.services.settings import get_game_status, get_holidays, get_round_status
-from Vampiro.services.game import get_round_number, get_alive_players, get_general_number_round_kills, get_current_danger, get_current_hunt, get_number_round_kills, get_number_total_kills, new_death_accusation, get_death_accusation, get_duel_where_hunter, get_duel_where_prey, set_prey_initial_response, reached_agreement, finalise_duel, set_hunter_duel_response, set_prey_duel_response, hunter_wins, get_current_dispute_by_prey, get_current_dispute_by_hunter
+from Vampiro.services.game import get_last_prey, get_round_number, get_alive_players, get_general_number_round_kills, get_current_danger, get_current_hunt, get_number_round_kills, get_number_total_kills, new_death_accusation, get_death_accusation, get_duel_where_hunter, get_duel_where_prey, set_prey_initial_response, reached_agreement, finalise_duel, set_hunter_duel_response, set_prey_duel_response, hunter_wins, get_current_dispute_by_prey, get_current_dispute_by_hunter
 from Vampiro.utils.security import handle_exceptions
 
 logger = logging.getLogger('simple_logger')
@@ -88,7 +88,7 @@ def my_stats():
         duel_response_form_hunter = DuelResponseForm()
         player = current_user.player
 
-        last_prey = get_current_hunt(player.id).prey.user
+        last_prey = get_last_prey(player.id).user
         ronda = get_round_number()
         total_kills = get_number_total_kills(player.id)
         pending_disputes = {

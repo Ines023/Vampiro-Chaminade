@@ -110,8 +110,15 @@ def get_current_hunt(hunter_room):
     Returns the current hunt object of a given hunter id
     """
     current_round = get_round_number()
-    current_hunt = Hunt.query.filter_by(round=current_round, room_hunter=hunter_room, success=False).first()
+    current_hunt = Hunt.query.join(Player, Player.id == Hunt.room_prey).filter(Hunt.round == current_round, Hunt.room_hunter == hunter_room, Hunt.success == False, Player.alive == True).first()
     return current_hunt
+
+def get_last_prey(hunter_room):
+    """
+    Returns the last prey of a given hunter id
+    """
+    last_prey = Hunt.query.filter_by(room_hunter=hunter_room, success=False).order_by(Hunt.date.desc()).first()
+    return last_prey
 
 def get_current_danger(prey_room):
     """
