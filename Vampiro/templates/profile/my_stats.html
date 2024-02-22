@@ -81,7 +81,7 @@
                                         {{ death_confirmation_form.desmentir(class="d-inline-block m-4 px-5 btn-danger btn-lg pixel-text", style="font-size: max(1.2vw, 16px)") }}
                                     </form>
                                     <p>Tienes hasta las
-                                    {% if disputes.death_accusation_where_prey.revision_group == "DAY" %}
+                                    {% if disputes.death_accusation_where_prey.revision_group.name == "DAY" %}
                                         00:00
                                     {% else %}
                                         12:00
@@ -102,7 +102,7 @@
                                 <div>
                                     <h2 class="my-3 text-danger pixel-text">{{ player.user.name }} ({{player.room}}) y {{prey.name}} ({{prey.room}})</h2>
                                     <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
-                                        {% if disputes.duel_where_hunter.revision_group == "DAY" %}
+                                        {% if disputes.duel_where_hunter.revision_group.name == "DAY" %}
                                             00:00
                                         {% else %}
                                             12:00
@@ -142,7 +142,7 @@
                                 <div>
                                     <h2 class="my-3 text-danger pixel-text">{{hunter.name}} ({{hunter.room}}) y {{ player.user.name }} ({{ player.room }})</h2>
                                     <p>Parece que no os ponéis de acuerdo.<br>Tenéis hasta las 
-                                        {% if disputes.duel_where_prey.revision_group == "DAY" %}
+                                        {% if disputes.duel_where_prey.revision_group.name == "DAY" %}
                                             00:00
                                         {% else %}
                                             12:00
