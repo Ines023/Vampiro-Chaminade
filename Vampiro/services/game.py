@@ -630,12 +630,19 @@ def new_round():
 
     for pair in round_pairs:
         new_hunt(pair, new_round_number)
-        hunter = get_player(pair[0])
-        prey = get_player(pair[1])
-        send_new_round_hunt_email(hunter, prey)
+
     
     logger.info('New round started: %s', new_round_number)
 
+def new_round_emails():
+
+    round_number = get_round_number()
+    hunts = get_hunts_filtered(round_filter=round_number)
+
+    for hunt in hunts:
+        hunter = hunt.hunter
+        prey = hunt.prey
+        send_new_round_hunt_email(hunter, prey)
 
 def process_round():
     """
@@ -657,6 +664,7 @@ def process_round():
         if jugadores_restantes and len(jugadores_restantes) > 1:
             print('new round')
             new_round()
+            new_round_emails()
         else:
             print('game over')
             game_over()
@@ -710,6 +718,7 @@ def start_game():
     for user in users:
         new_player(user.id)
     new_round()
+    new_round_emails()
     logger.info('Game started')
     pass
 
