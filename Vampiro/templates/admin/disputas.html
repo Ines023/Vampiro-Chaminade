@@ -84,10 +84,10 @@
             
               <!-- Paginación -->
               {% if disputas.has_prev %}
-                <a href="{{ url_for('admin.disputas', page=hunts.prev_num) }}">Anterior</a>
+                <a href="{{ url_for('admin.disputas', page=disputas.prev_num) }}">Anterior</a>
               {% endif %}
               {% if disputas.has_next %}
-                <a href="{{ url_for('admin.disputas', page=hunts.next_num) }}">Siguiente</a>
+                <a href="{{ url_for('admin.disputas', page=disputas.next_num) }}">Siguiente</a>
               {% endif %}
               <p>Total disputas: {{ disputas.total }}</p>
             </div>
