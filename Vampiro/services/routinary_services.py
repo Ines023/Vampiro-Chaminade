@@ -22,12 +22,14 @@ def DatabaseUpdate():
         current_day = spain_timestamp.strftime('%A')
         current_hour = spain_timestamp.hour
 
+        logger.info('Hoy es %s y son las %s horas', current_day, current_hour)
+
         if current_day == 'Monday':
             if current_hour < 12:
                 logger.info('Performing Monday 00:00 task')
                 dispute_revision('DAY')
                 round_end()
-            elif current_hour > 12:
+            elif current_hour >= 12:
                 logger.info('Performing Monday 12:00 task')
                 dispute_revision('NIGHT')
                 revision_period_done()
@@ -36,6 +38,6 @@ def DatabaseUpdate():
             if current_hour < 12:
                 logger.info('Performing night task, checking day disputes')
                 dispute_revision('DAY')
-            elif current_hour > 12:
+            elif current_hour >= 12:
                 logger.info('Performing morning task, cheking night disputes')
                 dispute_revision('NIGHT')
