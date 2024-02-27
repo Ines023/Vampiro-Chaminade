@@ -4,9 +4,11 @@ import logging
 
 from Vampiro.services.game import revision_period_done, dispute_revision, round_end
 from Vampiro.services.settings import get_timer_switch_value
+from Vampiro.utils.security import handle_exceptions
 
 logger = logging.getLogger('simple_logger')
 
+@handle_exceptions
 def DatabaseUpdate():
     timer_switch_value = get_timer_switch_value()  
 
@@ -16,14 +18,11 @@ def DatabaseUpdate():
     else:
         logger.info('The timer is on')
 
-        try:
-            spain_tz = pytz.timezone('Europe/Madrid')
-            logger.info('The timezone was chosen')
-            spain_timestamp = datetime.datetime.now(spain_tz)
-            logger.info('The timestamp was created')
-        except Exception as e:
-            logger.error('An error occurred while creating the timestamp: %s', e)
-            raise
+        spain_tz = pytz.timezone('Europe/Madrid')
+        logger.info('The timezone was chosen')
+        spain_timestamp = datetime.datetime.now(spain_tz)
+        logger.info('The timestamp was created')
+
 
         current_day = spain_timestamp.strftime('%A')
         current_hour = spain_timestamp.hour
