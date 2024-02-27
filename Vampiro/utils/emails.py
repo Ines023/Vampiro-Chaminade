@@ -173,7 +173,7 @@ def send_deadline_extension_email(player):
     
 def send_death_accusation_email(player, revision_group):
 
-    if revision_group == 'DAY':
+    if revision_group.name == 'DAY':
         hora = '00:00'
     else:
         hora = '12:00'
@@ -209,7 +209,7 @@ def send_victim_death_email(player):
 
 def send_duel_started_email(player, revision_group):
 
-    if revision_group == 'DAY':
+    if revision_group.name == 'DAY':
         hora = '00:00'
     else:
         hora = '12:00'
