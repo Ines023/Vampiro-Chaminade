@@ -20,7 +20,7 @@ def DatabaseUpdate():
 
         spain_tz = pytz.timezone('Europe/Madrid')
         logger.info('The timezone was chosen')
-        spain_timestamp = datetime.datetime.now(spain_tz)
+        spain_timestamp = datetime.now(spain_tz)
         logger.info('The timestamp was created')
 
 
