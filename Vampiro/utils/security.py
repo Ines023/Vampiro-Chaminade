@@ -72,7 +72,7 @@ def error_management(e, jugador="Alguien random", pagina="desconocida"):
     """
     Manages the errors that are not caught by the app. Tries to send an email to the organizers with the error details, if it fails, it flashes a message to the user
     """
-    print('Error: ' + str(e))
+    logger.error('Error: ' + str(e))
     try:
         send_error_email(e, jugador, pagina)
         flash('¡Ha saltado un error inesperado! Los organizadores han recibido un correo al respecto', 'danger')
