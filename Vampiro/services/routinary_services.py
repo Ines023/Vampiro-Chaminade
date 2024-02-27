@@ -17,7 +17,9 @@ def DatabaseUpdate():
         logger.info('The timer is on')
 
         spain_tz = pytz.timezone('Europe/Madrid')
+        logger.info('The timezone was chosen')
         spain_timestamp = datetime.datetime.now(spain_tz)
+        logger.info('The timestamp was created')
 
         current_day = spain_timestamp.strftime('%A')
         current_hour = spain_timestamp.hour
