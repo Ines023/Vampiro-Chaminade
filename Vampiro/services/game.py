@@ -1,6 +1,7 @@
 # Vampiro/services/game.py
 import random
 from datetime import datetime
+from time import sleep
 
 from sqlalchemy import and_, func
 
@@ -9,7 +10,8 @@ from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import Hunt, Player, Dispute, Revision_Group
 from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_game_status, set_round_status
 from Vampiro.services.users import get_user_by_role
-from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_hunt_available_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email
+from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_hunt_available_email, send_hunt_success_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email, send_victim_death_email
+from celery import Celery
 
 logger = logging.getLogger('simple_logger')
 
@@ -49,7 +51,7 @@ def new_player(user_id):
     """
     Creates a new player with the given room number
     """
-    player = Player(id=user_id, alive=True)
+    player = Player(id=user_id, alive=True, immunity=False)
     db.session.add(player)
     db.session.commit()
     logger.info('New player created: %s', player)
@@ -180,7 +182,7 @@ def new_death_accusation(room_hunter):
     hunt_id = hunt.id
     date = datetime.now()
 
-    dispute = Dispute(hunt_id=hunt_id, date=date, prey_response=None, hunter_duel_response=None, prey_duel_response=None, active=True)
+    dispute = Dispute(hunt_id=hunt_id, date=date, prey_response=None, hunter_duel_response=None, prey_duel_response=None, active=True, on_pause=False)
     dispute.set_revision_group()
     db.session.add(dispute)
     db.session.commit()
@@ -555,14 +557,25 @@ def death_accusation_revision(revision_group):
     acusaciones_pendientes = get_general_death_accusations(revision_group=revision_group)
     if acusaciones_pendientes:
         for acusacion in acusaciones_pendientes:
-            hunter_wins(acusacion)
+            if not acusacion.on_pause:
+                hunter_wins(acusacion)
+                hunter = acusacion.hunt.hunter
+                dead_victim = acusacion.hunt.prey
+                next_victim = get_current_hunt(hunter.id).prey
+                send_hunt_success_email(hunter, next_victim)
+                send_victim_death_email(dead_victim)
+            else:
+                logger.info('Death accusation on pause: %s', acusacion)
     logger.info('death accusation revision done')
 
 def duel_revision(revision_group):
     duelos_pendientes = get_general_duels(revision_group=revision_group)
     if duelos_pendientes:
         for duelo in duelos_pendientes:
-            finalise_duel(duelo)
+            if not duelo.on_pause:
+                finalise_duel(duelo)
+            else:
+                logger.info('Duel on pause: %s', duelo)
     logger.info('duel revision done')
 
 def dispute_revision(revision_group):
@@ -585,26 +598,28 @@ def deaths_from_starvation():
     This only happens once, controlled by the extension_status variable.
     """
     round_number = get_round_number()
-    print('round number:', round_number)
+    logger.info('round number:', round_number)
     unsuccessful_players = get_unsuccessful_players(round_number)
-    print('unsuccessful players:', unsuccessful_players)
+    logger.info('unsuccessful players:', unsuccessful_players)
     jugadores_vivos = get_alive_players()
-    print('jugadores vivos:', jugadores_vivos)
+    logger.info('jugadores vivos:', jugadores_vivos)
     extension_status = get_extension_status()
-    print('extension status:', extension_status)
+    logger.info('extension status:', extension_status)
 
     if (len(unsuccessful_players) == len(jugadores_vivos)) and (extension_status.value == 'NOT_EXTENDED'):
-        print('inside extension')
+        logger.info('inside extension')
         for player in unsuccessful_players:
             send_deadline_extension_email(player)
         set_extension_status('EXTENDED')
         logger.info('Deadline has been extended')
     else:  
-        print('inside anihilation by starvation')
-        print('unsuccessful players:', unsuccessful_players)
+        logger.info('inside anihilation by starvation')
         for player in unsuccessful_players:
-            kill(player)
-            send_starvation_email(player)
+            if not player.immunity:
+                kill(player)
+                send_starvation_email(player)
+            else:
+                logger.info('Player with immunity: %s', player)
         db.session.commit()
         logger.info('Starvation deaths done')
 
@@ -631,18 +646,24 @@ def new_round():
     for pair in round_pairs:
         new_hunt(pair, new_round_number)
 
-    
     logger.info('New round started: %s', new_round_number)
 
 def new_round_emails():
+    BATCH_SIZE = 20
+    PAUSE_TIME = 300
 
     round_number = get_round_number()
     hunts = get_hunts_filtered(round_filter=round_number)
 
-    for hunt in hunts:
-        hunter = hunt.hunter
-        prey = hunt.prey
-        send_new_round_hunt_email(hunter, prey)
+    for i in range(0, len(hunts), BATCH_SIZE):
+        batch = hunts[i:i + BATCH_SIZE]
+        
+        for hunt in batch:
+            hunter = hunt.hunter
+            prey = hunt.prey
+            send_new_round_hunt_email(hunter, prey)
+        
+        sleep(PAUSE_TIME)
 
 def process_round():
     """

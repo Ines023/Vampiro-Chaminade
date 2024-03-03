@@ -162,8 +162,7 @@ def death_confirmation():
     If the prey confirms the death, the hunter wins the dispute, gets a new hunt and emails are sent.
     If the prey denies the death, the hunter is informed and the dispute becomes a duel, its revision group is updated.
     """
-
-    logger.info('Death confirmation route visited')
+    logger.info('Death confirmation route visited by %s', current_user)
     form = DeathConfirmationForm()
     player = current_user.player
     

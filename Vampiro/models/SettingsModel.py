@@ -32,4 +32,16 @@ class Settings(db.Model):
     timer_switch = db.Column(db.Boolean, nullable=False)
     holidays = db.Column(db.Boolean, nullable=False)
 
+class EmailBatchType(Enum):
+    NEW_ROUND = 'NEW_ROUND'
+    STARVATION = 'STARVATION'
+    GAME_FINISHED = 'GAME_FINISHED'
+
+class EmailBatches(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    round_number = db.Column(db.Integer, nullable=False)
+    batch_type = db.Column(db.Enum(EmailBatchType), nullable=False)
+    total_20_batches = db.Column(db.Integer, nullable=False)
+    current_20_batch = db.Column(db.Boolean, nullable=False)
 

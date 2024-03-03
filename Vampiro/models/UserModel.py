@@ -76,6 +76,7 @@ class Role(db.Model):
 class Player(db.Model):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     alive = db.Column(db.Boolean, nullable=False)
+    immunity = db.Column(db.Boolean, nullable=False)
     
     hunt_where_hunter = db.relationship('Hunt', backref='hunter', foreign_keys='Hunt.room_hunter')
     hunt_where_prey = db.relationship('Hunt', backref='prey', foreign_keys='Hunt.room_prey')
@@ -111,6 +112,7 @@ class Dispute(db.Model):
     hunter_duel_response = db.Column(db.Boolean)
     prey_duel_response = db.Column(db.Boolean)
     active = db.Column(db.Boolean, nullable=False)
+    on_pause = db.Column(db.Boolean, nullable=False)
     revision_group = db.Column(db.Enum(Revision_Group), nullable=False)
 
     def set_revision_group(self):
