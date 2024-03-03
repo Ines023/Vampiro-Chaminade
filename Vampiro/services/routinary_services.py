@@ -1,12 +1,16 @@
 from datetime import datetime
+import json
 import pytz
 import logging
+
+import requests
 
 from Vampiro.services.game import revision_period_done, dispute_revision, round_end
 from Vampiro.services.settings import get_timer_switch_value
 from Vampiro.utils.security import handle_exceptions
 
 logger = logging.getLogger('simple_logger')
+
 
 @handle_exceptions
 def DatabaseUpdate():

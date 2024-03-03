@@ -173,7 +173,6 @@ def intervencion_divina(accion):
 
     return render_template('admin/intervencion_divina.html')
 
-
 @admin.route('/database_management', methods=['GET', 'POST'])
 @handle_exceptions
 def database_management():

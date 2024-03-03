@@ -1,17 +1,16 @@
 # Vampiro/services/game.py
 import random
 from datetime import datetime
-from time import sleep
+from flask import jsonify
 
 from sqlalchemy import and_, func
 
 import logging
 from Vampiro.database.mysql import db
 from Vampiro.models.UserModel import Hunt, Player, Dispute, Revision_Group
-from Vampiro.services.settings import get_extension_status, get_round_status, set_extension_status, set_game_status, set_round_status
+from Vampiro.services.settings import get_batch_size, get_current_batch, get_extension_status, get_round_status, get_total_batches, new_email_batch_group, set_current_batch, set_extension_status, set_game_status, set_round_status
 from Vampiro.services.users import get_user_by_role
-from Vampiro.utils.emails import send_deadline_extension_email, send_game_finished_email, send_hunt_available_email, send_hunt_success_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email, send_victim_death_email
-from celery import Celery
+from Vampiro.utils.emails import send_deadline_extension_email, send_email_batch_http_request, send_game_finished_email, send_hunt_available_email, send_hunt_success_email, send_new_round_hunt_email, send_starvation_email, send_death_accusation_email, send_duel_hunter_win_email, send_duel_hunter_loss_email, send_duel_prey_win_email, send_duel_prey_loss_email, send_victim_death_email
 
 logger = logging.getLogger('simple_logger')
 
@@ -599,29 +598,40 @@ def deaths_from_starvation():
     """
     round_number = get_round_number()
     logger.info('round number:', round_number)
+
     unsuccessful_players = get_unsuccessful_players(round_number)
     logger.info('unsuccessful players:', unsuccessful_players)
+
     jugadores_vivos = get_alive_players()
     logger.info('jugadores vivos:', jugadores_vivos)
+
     extension_status = get_extension_status()
     logger.info('extension status:', extension_status)
 
     if (len(unsuccessful_players) == len(jugadores_vivos)) and (extension_status.value == 'NOT_EXTENDED'):
         logger.info('inside extension')
-        for player in unsuccessful_players:
-            send_deadline_extension_email(player)
         set_extension_status('EXTENDED')
         logger.info('Deadline has been extended')
+
+        round_number = get_round_number()
+
+        new_email_batch_group(round_number, batch_type='EXTENSION', recepients=unsuccessful_players)
+        send_email_batch_http_request(batch_type='EXTENSION')
+
     else:  
         logger.info('inside anihilation by starvation')
         for player in unsuccessful_players:
             if not player.immunity:
                 kill(player)
-                send_starvation_email(player)
             else:
                 logger.info('Player with immunity: %s', player)
         db.session.commit()
         logger.info('Starvation deaths done')
+
+        round_number = get_round_number()
+
+        new_email_batch_group(round_number, batch_type='STARVATION', recepients=unsuccessful_players)
+        send_email_batch_http_request(batch_type='STARVATION')
 
 def generate_pairs():
 
@@ -635,6 +645,8 @@ def generate_pairs():
     logger.info('Pairs generated: %s', pairs)
     return pairs
 
+
+
 def new_round():
     """
     Generates new pairs, updates the hunt table with the new round number and pairs, and sends the new round email to the hunters.
@@ -645,25 +657,120 @@ def new_round():
 
     for pair in round_pairs:
         new_hunt(pair, new_round_number)
-
     logger.info('New round started: %s', new_round_number)
 
-def new_round_emails():
-    BATCH_SIZE = 20
-    PAUSE_TIME = 300
+    new_email_batch_group(new_round_number, batch_type='NEW_ROUND', recepients=round_pairs)
+    send_email_batch_http_request(batch_type='NEW_ROUND')
 
-    round_number = get_round_number()
-    hunts = get_hunts_filtered(round_filter=round_number)
 
-    for i in range(0, len(hunts), BATCH_SIZE):
-        batch = hunts[i:i + BATCH_SIZE]
-        
-        for hunt in batch:
-            hunter = hunt.hunter
-            prey = hunt.prey
-            send_new_round_hunt_email(hunter, prey)
-        
-        sleep(PAUSE_TIME)
+def next_emails_batch(batch_type):
+
+    BATCH_SIZE = get_batch_size()
+
+    if batch_type == 'NEW_ROUND':
+        round_number = get_round_number()
+        current_batch = get_current_batch(round_number, batch_type)
+        total_batches = get_total_batches(round_number, batch_type)
+
+        if current_batch < total_batches:
+            current_batch += 1
+            set_current_batch(round_number, batch_type, current_batch)
+
+            hunts = get_hunts_filtered(round_filter=round_number)
+            hunts.sort(key=lambda hunt: hunt.id)
+
+            for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
+                if i < len(hunts):
+                    hunt = hunts[i]
+                    hunter = hunt.hunter
+                    prey = hunt.prey
+                    send_new_round_hunt_email(hunter, prey)
+                else:
+                    break
+
+            logger.info('New round batch sent NUMBER: %s', current_batch)
+            return jsonify({"message": "New round batch sent"}), 221
+        else:
+            logger.info('All new round emails sent')
+            return jsonify({"message": "All new round batches sent"}), 222
+
+    if batch_type == 'STARVATION':
+        round_number = get_round_number()
+        current_batch = get_current_batch(round_number, batch_type)
+        total_batches = get_total_batches(round_number, batch_type)
+
+        if current_batch < total_batches:
+            unsuccessful_players = get_unsuccessful_players(round_number)
+
+            for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
+                if i < len(unsuccessful_players):
+                    player = unsuccessful_players[i]
+
+                    if not player.immunity:
+                        send_starvation_email(player)
+                    else:
+                        logger.info('Player with immunity did not receive email: %s', player)
+                else:
+                    break
+            
+            logger.info('New starvation batch sent NUMBER: %s', current_batch)
+            return jsonify({"message": "Starvation batch sent"}), 221
+        else:
+            logger.info('All starvation emails sent')
+            return jsonify({"message": "All starvation batches sent"}), 223
+
+    if batch_type == 'EXTENSION':
+        round_number = get_round_number()
+        current_batch = get_current_batch(round_number, batch_type)
+        total_batches = get_total_batches(round_number, batch_type)
+
+        if current_batch < total_batches:
+            unsuccessful_players = get_unsuccessful_players(round_number)
+
+            for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
+                if i < len(unsuccessful_players):
+                    player = unsuccessful_players[i]
+                    send_deadline_extension_email(player)
+                else:
+                    break
+            
+            logger.info('New extension batch sent NUMBER: %s', current_batch)
+            return jsonify({"message": "Extension batch sent"}), 221
+        else:
+            logger.info('All extension emails sent')
+            return jsonify({"message": "All extension batches sent"}), 224
+
+    if batch_type == 'GAME_FINISHED':
+
+        round_number = get_round_number()
+        current_batch = get_current_batch(round_number, batch_type)
+        total_batches = get_total_batches(round_number, batch_type)
+
+        if current_batch < total_batches:
+            jugadores_vivos = get_alive_players()
+
+            if len(jugadores_vivos) == 1:
+                ganador = jugadores_vivos[0]
+            else:
+                ganador = None
+
+            players = Player.query.all()
+            players.sort(key=lambda player: player.id)
+
+            for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
+                if i < len(players):
+                    player = players[i]
+                    send_game_finished_email(player, ganador=ganador)
+                else:
+                    break
+
+            logger.info('New game over batch sent NUMBER: %s', current_batch)
+            return jsonify({"message": "Game over batch sent"}), 221
+        else:
+            logger.info('All game over emails sent')
+            return jsonify({"message": "All game over batches sent"}), 225
+
+
 
 def process_round():
     """
@@ -680,20 +787,18 @@ def process_round():
         print ('round status set to processed')
         logger.info('Round processed') 
 
-        jugadores_restantes = get_alive_players()
-
-        if jugadores_restantes and len(jugadores_restantes) > 1:
-            print('new round')
-            new_round()
-            new_round_emails()
-        else:
-            print('game over')
-            game_over()
-
     else:
         logger.info('round was not due to be finalised')
         print('round was not due to be finalised')
         pass
+
+def process_round_continuation():
+    jugadores_restantes = get_alive_players()
+
+    if jugadores_restantes and len(jugadores_restantes) > 1:
+        new_round()
+    else:
+        game_over()
 
 # SUNDAY 00:00
 
@@ -739,7 +844,6 @@ def start_game():
     for user in users:
         new_player(user.id)
     new_round()
-    new_round_emails()
     logger.info('Game started')
     pass
 
@@ -754,12 +858,12 @@ def game_over():
         ganador = jugadores_vivos[0]
         logger.info('Game over, winner: %s', ganador)
     else:
-        ganador = None
         logger.info('Game over, no winner')
-    
-
-    players = Player.query.all()
-    for player in players:
-        send_game_finished_email(player, ganador=ganador)
 
     set_game_status('FINISHED')
+
+    round_number = get_round_number()
+    all_players = Player.query.all()
+
+    new_email_batch_group(round_number, batch_type='GAME_FINISHED', recepients=all_players)
+    send_email_batch_http_request(batch_type='GAME_FINISHED')

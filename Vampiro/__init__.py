@@ -61,7 +61,7 @@ def create_app(config_class=Config):
 
     from Vampiro.models.UserModel import User, Role, Player, Hunt, Dispute
     from Vampiro.models.NewsletterModel import Cronicas
-    from Vampiro.models.SettingsModel import Settings
+    from Vampiro.models.SettingsModel import Settings, EmailBatches
 
     migrate = Migrate(app, db)
 
@@ -70,7 +70,7 @@ def create_app(config_class=Config):
 
         # Initial setting creation
         if Settings.query.count() == 0:
-            settings = Settings( mode='VAMPIRO', game_status='NOT_STARTED', round_status='PROCESSED', extension_status='NOT_EXTENDED', timer_switch=False, holidays=False)
+            settings = Settings( mode='VAMPIRO', game_status='NOT_STARTED', round_status='PROCESSED', extension_status='NOT_EXTENDED', timer_switch=False, holidays=False, batch_size=30)
             db.session.add(settings)
 
         # Check if roles already exist

@@ -1,7 +1,7 @@
 # /Vampiro/utils/emails.py
 
 from urllib.parse import quote_plus
-from flask import render_template, request
+from flask import render_template
 import json
 
 import requests
@@ -282,3 +282,30 @@ def send_error_email(error, jugador, pagina):
 
     logger.info('Email de error enviado a %s', recipient)
     send_email(subject, message, recipient)
+
+
+def send_email_batch_http_request(batch_type):
+    """
+    Sends an HTTP request to the Azure Logic App to send an email batch
+    """
+
+    #   URL of the Logic App
+    url = "https://prod-26.francecentral.logic.azure.com:443/workflows/34d1fdc923c4451eae4f676da8770c57/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=yRWNrIeQhAg_WAOm9SEosWd77w0_kni0BGesk2-KOFs"
+
+    #   JSON payload
+    payload = {
+        "batch_type": batch_type
+    }
+    
+    #   Headers
+    headers = {'Content-Type': 'application/json'}
+
+    #   Send the HTTP request
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+    #   Check the response
+    if response.status_code == 200:
+        print("Request to Logic App was successful.")
+    else:
+        print(f"Request to Logic App failed with status code {response.status_code}.")
+
