@@ -597,19 +597,18 @@ def deaths_from_starvation():
     This only happens once, controlled by the extension_status variable.
     """
     round_number = get_round_number()
-    logger.info('round number:', round_number)
+    logger.info('round number: %s', round_number)
 
     unsuccessful_players = get_unsuccessful_players(round_number)
-    logger.info('unsuccessful players:', unsuccessful_players)
+    logger.info('unsuccessful players: %s', unsuccessful_players)
 
     jugadores_vivos = get_alive_players()
-    logger.info('jugadores vivos:', jugadores_vivos)
+    logger.info('jugadores vivos: %s', jugadores_vivos)
 
     extension_status = get_extension_status()
-    logger.info('extension status:', extension_status)
+    logger.info('extension status: %s', extension_status)
 
     if (len(unsuccessful_players) == len(jugadores_vivos)) and (extension_status.value == 'NOT_EXTENDED'):
-        logger.info('inside extension')
         set_extension_status('EXTENDED')
         logger.info('Deadline has been extended')
 
@@ -777,19 +776,18 @@ def process_round():
     Processes the round only if the round status is TO_BE_FINALISED.
     If so, starvation deaths are processed, it sets the round status to PROCESSED, and a new round is started.
     """
-
+    logger.info('Round is about to be processed')
     round_status = get_round_status()
     if round_status.value == 'TO_BE_FINALISED':
-        print('inside to be finalised')
+
         deaths_from_starvation()
-        print('deaths from starvation done')
+
         set_round_status('PROCESSED')
-        print ('round status set to processed')
-        logger.info('Round processed') 
+        logger.info('Round processed, Round status set to PROCESSED') 
 
     else:
-        logger.info('round was not due to be finalised')
-        print('round was not due to be finalised')
+        logger.info('Round was not due to be finalised')
+        print('Round was not due to be finalised')
         pass
 
 def process_round_continuation():

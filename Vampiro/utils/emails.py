@@ -305,7 +305,7 @@ def send_email_batch_http_request(batch_type):
 
     #   Check the response
     if response.status_code == 200:
-        print("Request to Logic App was successful.")
+        logger.info("Request to Logic App was successful.")
     else:
-        print(f"Request to Logic App failed with status code {response.status_code}.")
+        logger.info(f"Request to Logic App failed with status code {response.status_code}.")
 
