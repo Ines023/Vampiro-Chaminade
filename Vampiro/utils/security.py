@@ -74,6 +74,7 @@ def error_management(e, jugador="Alguien random", pagina="desconocida"):
     """
     logger.error('Error: ' + str(e))
     try:
+        logger.error('Error: ' + str(e) + ' Jugador: ' + str(jugador) + ' Pagina: ' + str(pagina))
         send_error_email(e, jugador, pagina)
         flash('¡Ha saltado un error inesperado! Los organizadores han recibido un correo al respecto', 'danger')
     except:

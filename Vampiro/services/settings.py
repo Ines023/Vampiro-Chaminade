@@ -140,7 +140,7 @@ def count_total_batches(recepients):
     Returns the total number of batches
     """
     BATCH_SIZE = get_batch_size()
-    Total = math.ceil(recepients.count()/BATCH_SIZE)
+    Total = math.ceil(len(recepients)/BATCH_SIZE)
     logger.info('Total batches: %s', Total)
     return Total
 
