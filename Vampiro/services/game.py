@@ -697,6 +697,9 @@ def next_emails_batch(round_number, batch_type):
         total_batches = get_total_batches(round_number, batch_type)
 
         if current_batch < total_batches:
+            current_batch += 1
+            set_current_batch(round_number, batch_type, current_batch)
+
             unsuccessful_players = get_unsuccessful_players(round_number)
 
             for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
@@ -721,6 +724,9 @@ def next_emails_batch(round_number, batch_type):
         total_batches = get_total_batches(round_number, batch_type)
 
         if current_batch < total_batches:
+            current_batch += 1
+            set_current_batch(round_number, batch_type, current_batch)
+
             unsuccessful_players = get_unsuccessful_players(round_number)
 
             for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
@@ -741,6 +747,9 @@ def next_emails_batch(round_number, batch_type):
         total_batches = get_total_batches(round_number, batch_type)
 
         if current_batch < total_batches:
+            current_batch += 1
+            set_current_batch(round_number, batch_type, current_batch)
+
             jugadores_vivos = get_alive_players()
 
             if len(jugadores_vivos) == 1:
