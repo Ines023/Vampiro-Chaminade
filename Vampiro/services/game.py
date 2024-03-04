@@ -666,9 +666,13 @@ def next_emails_batch(round_number, batch_type):
 
     BATCH_SIZE = get_batch_size()
 
+    logger.info('New batch request received: %s with batch size: %s', batch_type, BATCH_SIZE)
+
     if batch_type == 'NEW_ROUND':
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
+
+        logger.info('Last batch: %s out of Total Batches: %s', current_batch, total_batches)
 
         if current_batch < total_batches:
             current_batch += 1
@@ -695,6 +699,8 @@ def next_emails_batch(round_number, batch_type):
     if batch_type == 'STARVATION':
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
+
+        logger.info('Last batch: %s out of Total Batches: %s', current_batch, total_batches)
 
         if current_batch < total_batches:
             current_batch += 1
@@ -723,6 +729,8 @@ def next_emails_batch(round_number, batch_type):
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
 
+        logger.info('Last batch: %s out of Total Batches: %s', current_batch, total_batches)
+
         if current_batch < total_batches:
             current_batch += 1
             set_current_batch(round_number, batch_type, current_batch)
@@ -745,6 +753,8 @@ def next_emails_batch(round_number, batch_type):
     if batch_type == 'GAME_FINISHED':
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
+
+        logger.info('Last batch: %s out of Total Batches: %s', current_batch, total_batches)
 
         if current_batch < total_batches:
             current_batch += 1

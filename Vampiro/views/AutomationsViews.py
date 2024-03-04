@@ -33,6 +33,8 @@ def email_batch():
         logger.info('Se ha recibido una petición para enviar un batch de emails sin el número de ronda. Se ha abortado la petición.')
         abort(400)
 
+    logger.info('Todos los parametros eran correctos')
+
     response = next_emails_batch(round, batch_type)
     return response
 
