@@ -508,7 +508,7 @@ def get_hunts_filtered(round_filter=None, room_filter=None, date_filter=None, su
         elif order_by == 'success':
             hunts_query = hunts_query.order_by(Hunt.success.desc())
 
-    return hunts_query
+    return hunts_query.all()
 
 def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=None, prey_filter=None, active_filter=None, order_by=None):
     """
@@ -546,7 +546,7 @@ def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=No
         elif order_by == 'active':
             hunts_query = hunts_query.order_by(Hunt.active.desc())
 
-    return disputes_query
+    return disputes_query.all()
 
 # TEMPORALISATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
