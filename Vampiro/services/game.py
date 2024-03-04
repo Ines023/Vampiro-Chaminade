@@ -466,7 +466,7 @@ def get_unsuccessful_players(round_number):
     unsuccessful_players = db.session.query(Player).filter(
         Player.hunt_where_hunter.any(Hunt.round == round_number),
         ~Player.hunt_where_hunter.any(and_(Hunt.round == round_number, Hunt.success == True)),
-        Player.alive == True
+        ~Player.hunt_where_prey.any(and_(Hunt.round == round_number, Hunt.success == True))
     ).all()
 
     return unsuccessful_players
@@ -615,7 +615,7 @@ def deaths_from_starvation():
         round_number = get_round_number()
 
         new_email_batch_group(round_number, batch_type='EXTENSION', recepients=unsuccessful_players)
-        send_email_batch_http_request(batch_type='EXTENSION')
+        send_email_batch_http_request(round=round_number,batch_type='EXTENSION')
 
     else:  
         logger.info('inside anihilation by starvation')
@@ -630,7 +630,7 @@ def deaths_from_starvation():
         round_number = get_round_number()
 
         new_email_batch_group(round_number, batch_type='STARVATION', recepients=unsuccessful_players)
-        send_email_batch_http_request(batch_type='STARVATION')
+        send_email_batch_http_request(round=round_number,batch_type='STARVATION')
 
 def generate_pairs():
 
@@ -658,16 +658,15 @@ def new_round():
         new_hunt(pair, new_round_number)
     logger.info('New round started: %s', new_round_number)
 
-    new_email_batch_group(new_round_number, batch_type='NEW_ROUND', recepients=round_pairs)
-    send_email_batch_http_request(batch_type='NEW_ROUND')
+    new_email_batch_group(round_number=new_round_number, batch_type='NEW_ROUND', recepients=round_pairs)
+    send_email_batch_http_request(round=new_round_number, batch_type='NEW_ROUND')
 
 
-def next_emails_batch(batch_type):
+def next_emails_batch(round_number, batch_type):
 
     BATCH_SIZE = get_batch_size()
 
     if batch_type == 'NEW_ROUND':
-        round_number = get_round_number()
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
 
@@ -694,7 +693,6 @@ def next_emails_batch(batch_type):
             return jsonify({"message": "All new round batches sent"}), 222
 
     if batch_type == 'STARVATION':
-        round_number = get_round_number()
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
 
@@ -719,7 +717,6 @@ def next_emails_batch(batch_type):
             return jsonify({"message": "All starvation batches sent"}), 223
 
     if batch_type == 'EXTENSION':
-        round_number = get_round_number()
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
 
@@ -740,8 +737,6 @@ def next_emails_batch(batch_type):
             return jsonify({"message": "All extension batches sent"}), 224
 
     if batch_type == 'GAME_FINISHED':
-
-        round_number = get_round_number()
         current_batch = get_current_batch(round_number, batch_type)
         total_batches = get_total_batches(round_number, batch_type)
 
@@ -791,6 +786,7 @@ def process_round():
         pass
 
 def process_round_continuation():
+    
     jugadores_restantes = get_alive_players()
 
     if jugadores_restantes and len(jugadores_restantes) > 1:
@@ -864,4 +860,4 @@ def game_over():
     all_players = Player.query.all()
 
     new_email_batch_group(round_number, batch_type='GAME_FINISHED', recepients=all_players)
-    send_email_batch_http_request(batch_type='GAME_FINISHED')
+    send_email_batch_http_request(round=round_number,batch_type='GAME_FINISHED')

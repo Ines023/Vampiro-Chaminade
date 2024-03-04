@@ -15,7 +15,7 @@ automation = Blueprint('automation', __name__)
 @handle_exceptions
 def email_batch():
     # Check for the secret key in the headers
-    logger.info('Se ha recibido una petición para enviar un batch de emails')
+    logger.info('Se ha recibido una petición para enviar un batch de emails parte primera')
     secret_key = request.headers.get('X-Secret-Key')
     if secret_key != current_app.config['SECRET_KEY']:
         logger.info('Alguien ha intentado enviar un batch de emails sin la clave secreta. Se ha abortado la petición.')
@@ -27,14 +27,20 @@ def email_batch():
         logger.info('Se ha recibido una petición para enviar un batch de emails sin el tipo de batch. Se ha abortado la petición.')
         abort(400)
     
-    response = next_emails_batch(batch_type)
+    # Get the round number from the request
+    round = request.headers.get('round')
+    if round is None:
+        logger.info('Se ha recibido una petición para enviar un batch de emails sin el número de ronda. Se ha abortado la petición.')
+        abort(400)
+
+    response = next_emails_batch(round, batch_type)
     return response
 
 @automation.route('/process_round_end', methods=['POST'])
 @handle_exceptions
 def process_round_end():
     # Check for the secret key in the headers
-    logger.info('Se ha recibido una petición para enviar un batch de emails')
+    logger.info('Se ha recibido una petición para enviar un batch de emails parte segunda')
     secret_key = request.headers.get('X-Secret-Key')
     if secret_key != current_app.config['SECRET_KEY']:
         logger.info('Alguien ha intentado enviar un batch de emails sin la clave secreta. Se ha abortado la petición.')

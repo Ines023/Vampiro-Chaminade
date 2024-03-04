@@ -284,7 +284,7 @@ def send_error_email(error, jugador, pagina):
     send_email(subject, message, recipient)
 
 
-def send_email_batch_http_request(batch_type):
+def send_email_batch_http_request(round, batch_type):
     """
     Sends an HTTP request to the Azure Logic App to send an email batch
     """
@@ -294,6 +294,7 @@ def send_email_batch_http_request(batch_type):
 
     #   JSON payload
     payload = {
+        "round": round,
         "batch_type": batch_type
     }
     
