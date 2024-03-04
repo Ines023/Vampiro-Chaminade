@@ -476,7 +476,7 @@ def get_unsuccessful_players(round_number):
 
 def get_hunts_filtered(round_filter=None, room_filter=None, date_filter=None, success_filter=None, order_by=None):
     """
-    Returns a list of hunts filtered by the given parameters
+    Returns a query of hunts filtered by the given parameters
     
     round_filter: int
     room_filter: int
@@ -507,8 +507,10 @@ def get_hunts_filtered(round_filter=None, room_filter=None, date_filter=None, su
             hunts_query = hunts_query.order_by(Hunt.round.desc())
         elif order_by == 'success':
             hunts_query = hunts_query.order_by(Hunt.success.desc())
+        elif order_by == 'id':
+            hunts_query = hunts_query.order_by(Hunt.id.desc())
 
-    return hunts_query.all()
+    return hunts_query
 
 def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=None, prey_filter=None, active_filter=None, order_by=None):
     """
@@ -518,16 +520,16 @@ def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=No
     hunter_filter: int
     prey_filter: int
     active_filter: string
-    order_by: string  ('date', 'round', 'active')
+    order_by: string  ('date', 'round', 'active','id')
     """
 
-    disputes_query = Dispute.query
+    disputes_query = Dispute.query.join(Hunt, Dispute.hunt_id == Hunt.id)
 
     if round_filter is not None:
-        disputes_query = disputes_query.filter_by(round=round_filter)
+        disputes_query = disputes_query.filter_by(Hunt.round == round_filter)
 
     if hunt_filter is not None:
-        disputes_query = disputes_query.filter_by(hunt_id=hunt_filter)
+        disputes_query = disputes_query.filter_by(Dispute.hunt_id == hunt_filter)
 
     if hunter_filter is not None:
         disputes_query = disputes_query.filter(Hunt.room_hunter == hunter_filter)
@@ -540,13 +542,15 @@ def get_disputes_filtered( round_filter=None, hunt_filter=None, hunter_filter=No
     
     if order_by is not None:
         if order_by == 'date':
-            hunts_query = hunts_query.order_by(Hunt.date.desc())
+            diputes_query = diputes_query.order_by(Hunt.date.desc())
         elif order_by == 'round':
-            hunts_query = hunts_query.order_by(Hunt.round.desc())
+            disputes_query = diputes_query.order_by(Hunt.round.desc())
         elif order_by == 'active':
-            hunts_query = hunts_query.order_by(Hunt.active.desc())
+            disputes_query = diputes_query.order_by(Dispute.active.desc())
+        elif order_by == 'id':
+            disputes_query = diputes_query.order_by(Dispute.id.desc())
 
-    return disputes_query.all()
+    return disputes_query
 
 # TEMPORALISATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -678,8 +682,7 @@ def next_emails_batch(round_number, batch_type):
             current_batch += 1
             set_current_batch(round_number, batch_type, current_batch)
 
-            hunts = get_hunts_filtered(round_filter=round_number)
-            hunts.sort(key=lambda hunt: hunt.id)
+            hunts = get_hunts_filtered(round_filter=round_number, order_by='id').all()
 
             for i in range((current_batch-1)*BATCH_SIZE, current_batch*BATCH_SIZE):
                 if i < len(hunts):
