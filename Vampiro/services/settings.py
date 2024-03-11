@@ -150,6 +150,7 @@ def new_email_batch_group(round_number, batch_type, recepients):
     total_batches = count_total_batches(recepients)
     emailbatches = EmailBatches( round_number = round_number, batch_type = batch_type, total_batches = total_batches, current_batch = 0)
     db.session.add(emailbatches)
+    db.session.commit()
     logger.info('New email batch group created for round %s and batch type %s', round_number, batch_type)
 
 def get_total_batches(round_number, batch_type):

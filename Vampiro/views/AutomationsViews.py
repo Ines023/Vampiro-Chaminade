@@ -48,6 +48,8 @@ def process_round_end():
         logger.info('Alguien ha intentado enviar un batch de emails sin la clave secreta. Se ha abortado la petición.')
         abort(403)
     
+    logger.info('Todos los parametros eran correctos')
+
     process_round_continuation()
     return 'Script has run'
 
