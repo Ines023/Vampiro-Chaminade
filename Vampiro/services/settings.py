@@ -159,6 +159,7 @@ def get_total_batches(round_number, batch_type):
     """
     emailbatches = EmailBatches.query.filter_by(round_number = round_number, batch_type = batch_type).first()
     total_batches = emailbatches.total_batches
+    db.session.commit()
     return total_batches
 
 def get_current_batch(round_number, batch_type):
@@ -167,6 +168,7 @@ def get_current_batch(round_number, batch_type):
     """
     emailbatches = EmailBatches.query.filter_by(round_number = round_number, batch_type = batch_type).first()
     current_batch = emailbatches.current_batch
+    db.session.commit()
     return current_batch
 
 def set_current_batch(round_number, batch_type, current_batch):
